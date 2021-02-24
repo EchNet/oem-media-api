@@ -1,0 +1,34 @@
+# Use this file to manage main dependencies
+# Run the following to generate final requirements.
+# pip freeze | grep -v "pkg-resources" > requirements.txt
+# Don't edit requirements.txt directly.
+
+Django
+boto3
+django-debug-toolbar
+django-admin-autocomplete-filter
+django-cors-headers
+django-extensions
+django-import-export
+django-localflavor
+django-object-actions
+django-rest-swagger
+django-storages
+django-widget-tweaks
+djangorestframework
+djangorestframework-api-key
+djangorestframework-jwt
+dj-database-url
+google-api-python-client
+gunicorn
+html2text
+ipython
+nested_lookup
+num2words
+psycopg2-binary
+python-decouple
+python-dotenv
+python-jose
+raven
+unicodecsv
+whitenoise
