@@ -23,15 +23,9 @@ requirements.flag: requirements.txt
 build: requirements.flag
 	$(PYTHON) ./manage.py makemigrations
 
-test: build
-	$(PYTHON) ./manage.py test ./djmain/tests
-
 run: build
 	$(PYTHON) ./manage.py migrate
 	$(PYTHON) ./manage.py runserver
-
-celery: build
-	$(CELERY) -A djmain worker --loglevel=debug
 
 clean:
 	rm -rf dist .cache build
