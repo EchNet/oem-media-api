@@ -63,32 +63,10 @@ MIDDLEWARE = (
 ROOT_URLCONF = "main.urls"
 WSGI_APPLICATION = "main.wsgi.application"
 
-# Caching
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": config("REDIS_URL"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "MAX_ENTRIES": 1000,
-        }
-    }
-}
-
 # Database
 DATABASES = {"default": config("DATABASE_URL", cast=db_url)}
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 DATABASES["default"]["CONN_MAX_AGE"] = 60
-
-# Channels
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [config("REDIS_URL")],
-        },
-    },
-}
 
 # Authentication
 LOGIN_REDIRECT_URL = "/"
