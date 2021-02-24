@@ -27,7 +27,6 @@ INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
-    "django.contrib.staticfiles",
     "django.contrib.humanize",
     "django.contrib.messages",
 
@@ -63,58 +62,12 @@ MIDDLEWARE = (
 ROOT_URLCONF = "main.urls"
 WSGI_APPLICATION = "main.wsgi.application"
 
-# Caching
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": config("REDIS_URL"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "MAX_ENTRIES": 1000,
-        }
-    }
-}
-
 # Database
 DATABASES = {"default": config("DATABASE_URL", cast=db_url)}
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 DATABASES["default"]["CONN_MAX_AGE"] = 60
 
-# Channels
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [config("REDIS_URL")],
-        },
-    },
-}
-
-# Authentication
-LOGIN_REDIRECT_URL = "/"
-LOGIN_URL = "/login/"
-LOGIN_ERROR_URL = "/login-error/"
-LOGOUT_REDIRECT_URL = LOGIN_URL
 SECRET_KEY = config("SECRET_KEY")
-# https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": ("django.contrib.auth.password_validation"
-                 ".UserAttributeSimilarityValidator")
-    },
-    {
-        "NAME": ("django.contrib.auth.password_validation"
-                 ".MinimumLengthValidator")
-    },
-    {
-        "NAME": ("django.contrib.auth.password_validation"
-                 ".CommonPasswordValidator")
-    },
-    {
-        "NAME": ("django.contrib.auth.password_validation"
-                 ".NumericPasswordValidator")
-    },
-]
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
@@ -159,15 +112,6 @@ SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", cast=bool, default=True)
 SERVE_MEDIA = DEBUG
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(SITE_ROOT, "media")
-
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(SITE_ROOT, "static")
-STATICFILES_DIRS = (os.path.join(SITE_ROOT, "static_dev"), )
-STATICFILES_FINDERS = (
-    "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-)
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Templates
 TEMPLATES = [
