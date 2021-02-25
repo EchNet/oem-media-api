@@ -24,6 +24,15 @@ class MediaFile(models.Model):
       verbose_name=_("created at"),
   )
 
+  # Flag for soft deletion.
+  deleted = models.BooleanField(
+      blank=False,
+      db_index=True,
+      null=False,
+      default=False,
+      verbose_name=_("deleted"),
+  )
+
   def __str__(self):
     return str(self.file)
 

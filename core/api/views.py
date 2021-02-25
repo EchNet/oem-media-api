@@ -20,6 +20,12 @@ class ListCreateMediaFileView(generics.ListCreateAPIView):
   queryset = models.MediaFile.objects.all()
   serializer_class = serializers.MediaFileSerializer
 
+  def get_queryset(self):
+    queryset = super().get_queryset().exclude(deleted=True)
+    for key, value in self.request.query_params.items():
+      queryset = queryset.filter(tags__key=key, tags__value=value)
+    return queryset
+
   def create(self, request):
     # Accept either the image file or the image file name.
     file_data = request.FILES.get("file", None)
