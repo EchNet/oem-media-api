@@ -45,7 +45,6 @@
   </form>
 </body>
 <script type="text/javascript">
-
   $("#query-form").on("submit", function(event) {
     event.preventDefault()
     var $form = $(this);
@@ -100,7 +99,7 @@
         xhr.setRequestHeader("Accept", "application/json")
       },
       success: function(data) {
-        $(".upload-status").removeClass("error").text("Uploaded to " + data.file);
+        $(".upload-status").append($("<a>").text("Uploaded").attr("href", data.file));
         $form.trigger("reset");
       },
       error: function() {
