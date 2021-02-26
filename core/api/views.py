@@ -2,7 +2,7 @@ import logging
 
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status, views
+from rest_framework import generics, parsers, status, views
 from rest_framework.response import Response
 
 from core import models
@@ -19,31 +19,23 @@ class PingView(views.APIView):
 class ListCreateMediaFileView(generics.ListCreateAPIView):
   queryset = models.MediaFile.objects.all()
   serializer_class = serializers.MediaFileSerializer
+  parser_classes = (parsers.MultiPartParser, )
 
   def get_queryset(self):
     queryset = super().get_queryset().exclude(deleted=True)
     for key, value in self.request.query_params.items():
-      queryset = queryset.filter(tags__key=key, tags__value=value)
+      if key.isalnum() and value and value.isalnum():
+        queryset = queryset.filter(tags__key=key, tags__value=value)
+    logger.debug(queryset.query)
+    logger.debug(queryset.count())
     return queryset
 
   def create(self, request):
-    # Accept either the image file or the image file name.
-    file_data = request.FILES.get("file", None)
-    file_name = request.data.get("file", None)
-    if file_data:
-      file = file_data
-    elif file_name:
-      file = file_name
-    else:
-      raise ValidationError("missing file")
-
-    tags = request.data.get("tags", "").split(",")
-    if not tags[0]:
-      raise ValidationError("missing tags")
-
-    media_file = models.MediaFile.objects.create(file=file)
-    for t in tags:
-      key = t.split("=")[0]
-      value = t[(len(key) + 1):]
-      models.MediaFileTag.objects.create(media_file=media_file, key=key, value=value)
-    return Response(serializers.MediaFileSerializer(media_file).data, status.HTTP_201_CREATED)
+    serializer = serializers.MediaFileSerializer(data=request.data)
+    if not serializer.is_valid():
+      return JsonResponse(serializer.errors, status=400)
+    media_file = serializer.save()
+    for key, value in self.request.POST.items():
+      if not key in ("file", "submit"):
+        models.MediaFileTag.objects.create(media_file=media_file, key=key, value=value)
+    return Response(serializer.data, status.HTTP_201_CREATED)

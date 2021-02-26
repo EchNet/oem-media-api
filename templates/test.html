@@ -1,2 +1,111 @@
 {% load static %}
-<h1>TEST</h1>
+<head>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+  <h1>TEST - OEM Interactive Media API</h1>
+  <style>
+    ul {
+      list-style-type: none;
+    }
+    .error {
+      color: red;
+    }
+    div.formrow {
+      margin-top: 5px;
+    }
+    img {
+      max-width: 500px;
+    }
+  </style>
+  <h2>Image Query</h2>
+  <p>Search for an image by its year, make and model.
+      Leave a field blank to match any value of that field.</p>
+  <form id="query-form" action="/api/1.0/media" method="GET">
+    <div class="formrow">
+      <input name="year" placeholder="Year (or blank)"/>
+      <input name="make" placeholder="Make (or blank)"/>
+      <input name="model" placeholder="Model (or blank)"/>
+      <input type="submit" name="submit" value="Search"/>
+    </div>
+  </form>
+  <ul id="image-list"></ul>
+  <h2>Image Upload</h2>
+  <form id="upload-form" action="/api/1.0/media" method="POST">
+    <div class="formrow">
+      Select file or drag and drop: <input name="file" type="file" required/>
+    </div>
+    <div class="formrow">
+      <input name="year" required placeholder="Year (required)"/>
+      <input name="make" required placeholder="Make (required)"/>
+      <input name="model" required placeholder="Model (required)"/>
+      <input type="submit" name="submit" value="Upload"/>
+    </div>
+    <div class="upload-status formrow"></div>
+  </form>
+</body>
+<script type="text/javascript">
+
+  $("#query-form").on("submit", function(event) {
+    event.preventDefault()
+    var $form = $(this);
+    var url = $form.attr("action");
+    $("#image-list").empty()
+    var year = $form.find("input[name='year']").val();
+    var make = $form.find("input[name='make']").val();
+    var model = $form.find("input[name='model']").val();
+    var queryParams = {};
+    if (year) queryParams.year = year;
+    if (make) queryParams.make = make;
+    if (model) queryParams.model = model;
+    $.ajax({
+      url: url,
+      type: "GET",
+      data: queryParams,
+      cache: false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      },
+      success: function(data) {
+        if (!data || !data.length) {
+          $("#image-list").append($("<li>").text("No matches."))
+        }
+        for (var i = 0; i < data.length; ++i) {
+          $("#image-list").append($("<li>").append($("<img>").attr("src", data[i].file)));
+        }
+        $form.trigger("reset");
+      },
+      error: function() {
+        $("#image-list").append($("<li>").addClass("error").text("Error."));
+      },
+    })
+  })
+
+  $("#upload-form").on("submit", function(event) {
+    if (!this.checkValidity()) {
+      return;
+    }
+    event.preventDefault()
+    var $form = $(this);
+    var url = $form.attr("action");
+    $(".upload-status").removeClass("error").text("");
+    $.ajax({
+      url: url,
+      type: "POST",
+      data: new FormData(this),
+      contentType: false,
+      cache: false,
+      processData: false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      },
+      success: function(data) {
+        $(".upload-status").removeClass("error").text("Uploaded to " + data.file);
+        $form.trigger("reset");
+      },
+      error: function() {
+        $(".upload-status").addClass("error").text("Error.");
+      },
+    })
+  })
+</script>

@@ -1,4 +1,6 @@
 import datetime
+import os
+import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -9,13 +11,24 @@ MEDIUM_MAX_LENGTH = 40
 LONG_MAX_LENGTH = 100
 
 
+def make_file_path(instance, filename):
+  ext = filename.split(".")[-1]
+  u = uuid.uuid4()
+  return os.path.join("media", f"{u}.{ext}")
+
+
 class MediaFile(models.Model):
   """
     A pointer to an image or other type of media file in storage.
   """
 
   # Path to the file in storage.
-  file = models.FileField(blank=False, null=False, verbose_name=_("file"))
+  file = models.FileField(
+      blank=False,
+      null=False,
+      upload_to=make_file_path,
+      verbose_name=_("file"),
+  )
 
   # When this record was created.
   created_at = models.DateTimeField(
