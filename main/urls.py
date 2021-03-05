@@ -8,6 +8,7 @@ urlpatterns = [
     path("admin123/", admin.site.urls),
     path("api/1.0/", include("core.api.urls")),
     path("test123", TemplateView.as_view(template_name="test.html")),
+    path("demo123", TemplateView.as_view(template_name="demoadmin.html")),
 ]
 
 if settings.SERVE_MEDIA:

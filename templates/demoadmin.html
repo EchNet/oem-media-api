@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+    }
+    .error {
+      color: red;
+    }
+    .require-selection:not(.selection) {
+      color: #ccc;
+    }
+    .require-selection:not(.selection) td {
+      color: #ccc;
+    }
+    .require-selection:not(.selection) th {
+      color: #ccc;
+    }
+    table {
+      margin-left: 50px;
+    }
+    .section {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h2>OEM Interactive: SEO Landing Page Content Admin</h2>
+  <div class="section">
+    <select id="website-select">
+      <option value="">Select a website...</option>
+      <option>sparksparts.com</option>
+      <option>sneedparts.com</option>
+      <option value="">More to be added...</option>
+    </select>
+    <select id="year-select">
+      <option value="">Select a year...</option>
+      <option>2011</option>
+      <option>2010</option>
+      <option>2009</option>
+      <option>2008</option>
+      <option>2007</option>
+      <option>2006</option>
+      <option>2005</option>
+      <option>2004</option>
+      <option>2003</option>
+      <option>2002</option>
+      <option>2001</option>
+      <option>2000</option>
+    </select>
+    <select id="make-select">
+      <option value="">Select a make...</option>
+      <option value="audi">Audi</option>
+      <option value="fiat">Fiat</option>
+      <option value="ford">Ford</option>
+      <option value="gm">GM</option>
+      <option value="hyundai">Hyundai</option>
+      <option value="kia">Kia</option>
+      <option value="nissan">Nissan</option>
+      <option value="saab">Saab</option>
+      <option value="subaru">Subaru</option>
+      <option value="volkswagen">Volkswagen</option>
+      <option value="volvo">Volvo</option>
+      <option value="">More to be added...</option>
+    </select>
+    <input id="model-input" type="text" placeholder="Enter a model"/>
+  </div>
+  <div class="require-selection section">
+    Images available for this model: <b id="nimages-span">-</b>
+  </div>
+  <h3 class="require-selection section">
+    Content sections:
+  </h3>
+  <table class="require-selection section">
+    <tbody>
+      <tr><td>ModelView</td><td><input type="checkbox" name="modelview" checked/></td></tr>
+      <tr><td>Air Filters</td><td><input type="checkbox" name="airfilters" checked/></td></tr>
+      <tr><td>Brake Pads</td><td><input type="checkbox" name="brakepads" checked/></td></tr>
+      <tr><td>Floor Mats</td><td><input type="checkbox" name="floormats" checked/></td></tr>
+      <tr><td>Roof Racks</td><td><input type="checkbox" name="roofracks" checked/></td></tr>
+      <tr><td>Emblems</td><td><input type="checkbox" name="emblems" checked/></td></tr>
+      <tr><td>Promo Title</td><td><input type="checkbox" name="promotitle" checked/></td></tr>
+      <tr><td>Paragraph 3</td><td><input type="checkbox" name="pp3" checked/></td></tr>
+      <tr><td>Paragraph 4</td><td><input type="checkbox" name="pp4" checked/></td></tr>
+      <tr><td>FAQ</td><td><input type="checkbox" name="faq"/></td></tr>
+      <tr><td>Vin-Decoder</td><td><input type="checkbox" name="vindecoder"/></td></tr>
+    </tbody>
+  </table>
+  <div class="require-selection section">
+    <button>Generate</button> <button id="preview-button">See Page</button>
+  </div>
+</body>
+<script type="text/javascript">
+  $("#website-select").on("change", function() {
+    checkComplete()
+  })
+  $("#year-select").on("change", function() {
+    checkComplete()
+  })
+  $("#make-select").on("change", function() {
+    checkComplete()
+  })
+  $("#model-input").on("change", function() {
+    checkComplete()
+  })
+  function checkComplete() {
+    $("#the-rest").append($("<p style='color: #cc22bb'>").text("Loading..."));
+    if (websiteValue() && yearValue() && makeValue() && modelValue()) {
+      loadAndRenderSelection();
+    }
+    else {
+      $(".require-selection button").attr("disabled", true);
+      $(".require-selection input").attr("disabled", true);
+      $(".require-selection").removeClass("selection");
+      $("#preview-button").text("See Page");
+    }
+  }
+  function loadAndRenderSelection() {
+    loadWymmConfig().then(function() {
+      loadImageCount().then(function() {
+        $(".require-selection button").attr("disabled", false);
+        $(".require-selection input").attr("disabled", false);
+        $(".require-selection").addClass("selection");
+        $("#preview-button").text("See " + previewUrl());
+      })
+    })
+  }
+  function loadWymmConfig() {
+    return {
+      then: function(f) {
+        f();
+      }
+    }
+  }
+  function loadImageCount() {
+    return $.ajax({
+      url: "/api/1.0/media",
+      type: "GET",
+      data: {
+        year: yearValue(),
+        make: makeValue(),
+        model: modelValue()
+      },
+      cache: false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      }
+    })
+    .then(function(data) {
+      if (!data || !data.length) {
+        $("#nimages-span").text("None")
+      }
+      else {
+        $("#nimages-span").text("" + data.length)
+      }
+    })
+    .catch(function(err) {
+      alert(err);
+    })
+  }
+  function websiteValue() {
+    return $("#website-select option:selected").val()
+  }
+  function yearValue() {
+    return $("#year-select option:selected").val()
+  }
+  function makeValue() {
+    return $("#make-select option:selected").val()
+  }
+  function modelValue() {
+    return $("#model-input").val()
+  }
+  function modelDisplayValue() {
+    return modelValue().replace(/\s/g, "").toLowerCase();
+  }
+  function previewUrl() {
+    return "https://" + websiteValue() + "/v-" + yearValue() + "-" + makeValue() + "-" + modelDisplayValue();
+  }
+  checkComplete()
+</script>
+</html>
