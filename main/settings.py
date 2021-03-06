@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'import_export',
 
     # custom apps
+    "content",
     "core",
 )
 
