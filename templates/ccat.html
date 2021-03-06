@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+    }
+    .error {
+      color: red;
+    }
+    .section {
+      margin: 20px 30px;
+    }
+    .centered {
+      text-align: center;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+    }
+    .main {
+      max-width: 550px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <h2 class="centered">OEM Interactive: SEO Landing Page Content Catalog</h2>
+    <div class="section centered">
+      <select id="section-select"><option value="">-- No sections --</option></select>
+      <input type="text" id="section-name-input" placeholder="New section name"/>
+      <button id="add-section-button">Add</button>
+    </div>
+    <div class="section row" id="variant-nav-div" style="display:none">
+      <span id="got-variants-span" style="display: none;">
+        Showing variant #<span id="variant-index-span"></span>
+        of <span id="nvariants-span"></span>
+      </span>
+      <span id="no-variants-span" style="display: none;">No content variants</span>
+      <a href="#" id="prev-variant-link">Previous</a>
+      <a href="#" id="next-variant-link">Next</a>
+      <button id="add-variant-button">Add variant</button>
+    </div>
+    <div class="section">
+      <textarea id="the-textarea" style="display:none"></textarea>
+    </div>
+    <div class="section centered">
+      <button id="save-button" style="display:none">Save</button>
+    </div>
+  </div>
+</body>
+<script type="text/javascript">
+  var contentSections;
+  var contentVariants;
+  var contentIndex;
+  var currentSection;
+  var currentVariantIndex;
+
+  function loadSections() {
+    return $.ajax({
+      url: "/api/1.0/cs",
+      type: "GET",
+      cache: false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      }
+    })
+    .then(function(data) {
+      contentSections = data;
+    })
+    .catch(function(err) {
+      alert("Error loading content catalog.");
+    });
+  }
+
+  function loadVariants() {
+    return $.ajax({
+      url: "/api/1.0/cv",
+      type: "GET",
+      cache: false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      }
+    })
+    .then(function(data) {
+      contentVariants = data;
+    })
+    .catch(function(err) {
+      alert("Error loading content catalog.");
+    });
+  }
+
+  function buildSectionSelect() {
+    var $select = $("#section-select");
+    $select.empty()
+    if (!contentSections.length) {
+      $select.append($("<option value=''>-- No sections --</option>"));
+    }
+    else {
+      $select.append($("<option value=''>Select a section</option>"));
+    }
+    for (var i = 0; i < contentSections.length; ++i) {
+      var cs = contentSections[i];
+      $select.append($("<option>").text(cs.name).attr("value", cs.id))
+    }
+  }
+
+  function buildContentIndex() {
+    contentIndex = {
+      byId: {},
+      byName: {}
+    };
+    for (var i = 0; i < contentSections.length; ++i) {
+      var cs = contentSections[i];
+      cs.variants = [];
+      contentIndex.byId[cs.id] = cs;
+      contentIndex.byName[cs.name] = cs;
+    }
+    for (var i = 0; i < contentVariants.length; ++i) {
+      var cv = contentVariants[i];
+      contentIndex.byId[cv.section].variants.push(cv)
+    }
+  }
+
+  loadSections().then(function() {
+    loadVariants().then(function() {
+      buildSectionSelect();
+      buildContentIndex();
+    })
+  });
+
+  $("#add-section-button").on("click", function() {
+    var sectionName =  $("#section-name-input").val();
+    if (!sectionName) {
+      alert("Enter new section name.")
+      return;
+    }
+    if (contentIndex.byName[sectionName]) {
+      alert("That section already exists.")
+      return;
+    }
+    $.ajax({
+      url: "/api/1.0/cs",
+      data: JSON.stringify({ name: sectionName }),
+      type: "POST",
+      contentType: "application/json",
+      dataType: "json",
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      }
+    })
+    .then(function(data) {
+      contentIndex.byId[data.id] = data;
+      contentIndex.byName[data.name] = name;
+      contentSections.push(data);
+      data.variants = [];
+      contentSections.sort();
+      buildSectionSelect();
+      $("#section-select").val(data.id);
+      currentSection = data;
+      currentVariantIndex = 0;
+      renderCurrentVariant();
+      $("#section-name-input").val("");
+    })
+    .catch(function(err) {
+      alert("Error adding section.");
+    });
+  })
+
+  $("#section-select").on("change", function() {
+    var sectionId = $(this).find("option:selected").val();
+    if (sectionId) {
+      currentSection = contentIndex.byId[sectionId];
+      currentVariantIndex = 0;
+      renderCurrentVariant();
+    }
+  })
+
+  function renderCurrentVariant() {
+    if (currentSection && currentSection.variants.length > 0) {
+      $("#the-textarea").show()
+      $("#the-textarea").attr("readonly", true);
+      $("#the-textarea").val("(Loading...)")
+      loadCurrentText();
+    }
+    else {
+      $("#the-textarea").hide()
+    }
+    refreshVariantNav();
+  }
+
+  function refreshVariantNav() {
+    $("#variant-nav-div").hide();
+    if (!currentSection) return;
+    var nvariants = currentSection.variants.length;
+    if (nvariants == 0) {
+      $("#got-variants-span").hide();
+      $("#no-variants-span").show();
+    }
+    else {
+      $("#got-variants-span").show();
+      $("#no-variants-span").hide();
+      $("#variant-index-span").text(currentVariantIndex + 1)
+      $("#nvariants-span").text(nvariants);
+    }
+    if (nvariants < 2) {
+      $("#prev-variant-link").hide();
+      $("#next-variant-link").hide();
+    }
+    else {
+      $("#prev-variant-link").show();
+      $("#next-variant-link").show();
+    }
+    $("#variant-nav-div").show();
+  }
+
+  function loadCurrentText() {
+    return $.ajax({
+      url: "/api/1.0/cv/" + currentSection.variants[currentVariantIndex].id,
+      type: "GET",
+      cache: false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      }
+    })
+    .then(function(data) {
+      $("#the-textarea").val(data.text);
+      $("#the-textarea").attr("readonly", false);
+      $("#save-button").show()
+    })
+    .catch(function(err) {
+      alert("Error loading content.");
+    });
+  }
+
+  $("#add-variant-button").on("click", function() {
+    if (!currentSection) return;
+    $.ajax({
+      url: "/api/1.0/cv",
+      data: JSON.stringify({ section: currentSection.id, text: "<p>Your HTML here.  Don't forget to click Save.</p>" }),
+      type: "POST",
+      contentType: "application/json",
+      dataType: "json",
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      }
+    })
+    .then(function(data) {
+      currentSection.variants.push(data);
+      currentVariantIndex = currentSection.variants.length - 1;
+      renderCurrentVariant();
+      $("#the-textarea").val(data.text);
+    })
+    .catch(function(err) {
+      alert("Error adding section.");
+    })
+  })
+
+  $("#save-button").on("click", function() {
+    if (!currentSection || !currentSection.variants.length) return;
+    var id = currentSection.variants[currentVariantIndex].id;
+    var text = $("#the-textarea").val();
+    $.ajax({
+      url: "/api/1.0/cv/" + id,
+      data: JSON.stringify({ section: currentSection.id, text: text }),
+      type: "PUT",
+      contentType: "application/json",
+      dataType: "json",
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      }
+    })
+    .then(function(data) {
+      alert("Saved.")
+    })
+    .catch(function(err) {
+      alert("Error saving text.");
+    })
+  })
+</script>
+</html>

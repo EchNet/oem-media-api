@@ -22,13 +22,21 @@
       margin-left: 50px;
     }
     .section {
-      margin-top: 30px;
+      margin: 20px 30px;
+    }
+    .centered {
+      text-align: center;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
     }
   </style>
 </head>
 <body>
-  <h2>OEM Interactive: SEO Landing Page Content Admin</h2>
-  <div class="section">
+  <h2 class="centered">OEM Interactive: SEO Landing Page Content Admin</h2>
+  <div class="section centered">
     <select id="website-select">
       <option value="">Select a website...</option>
       <option>sparksparts.com</option>
@@ -67,32 +75,41 @@
     </select>
     <input id="model-input" type="text" placeholder="Enter a model"/>
   </div>
-  <div class="require-selection section">
-    Images available for this model: <b id="nimages-span">-</b>
+  <div class="require-selection section row">
+    <span>Images available for this year/make/model: <b id="nimages-span">---</b></span>
+    <span><a href="test123">Add images</a></span>
   </div>
-  <h3 class="require-selection section">
-    Content sections:
-  </h3>
-  <table class="require-selection section">
-    <tbody>
-      <tr><td>ModelView</td><td><input type="checkbox" name="modelview" checked/></td></tr>
-      <tr><td>Air Filters</td><td><input type="checkbox" name="airfilters" checked/></td></tr>
-      <tr><td>Brake Pads</td><td><input type="checkbox" name="brakepads" checked/></td></tr>
-      <tr><td>Floor Mats</td><td><input type="checkbox" name="floormats" checked/></td></tr>
-      <tr><td>Roof Racks</td><td><input type="checkbox" name="roofracks" checked/></td></tr>
-      <tr><td>Emblems</td><td><input type="checkbox" name="emblems" checked/></td></tr>
-      <tr><td>Promo Title</td><td><input type="checkbox" name="promotitle" checked/></td></tr>
-      <tr><td>Paragraph 3</td><td><input type="checkbox" name="pp3" checked/></td></tr>
-      <tr><td>Paragraph 4</td><td><input type="checkbox" name="pp4" checked/></td></tr>
-      <tr><td>FAQ</td><td><input type="checkbox" name="faq"/></td></tr>
-      <tr><td>Vin-Decoder</td><td><input type="checkbox" name="vindecoder"/></td></tr>
-    </tbody>
-  </table>
+  <div class="require-selection section row">
+    <h3>Content sections:</h3>
+    <span><a href="ccat123">Add content</a></span>
+  </div>
+  <div id="content-sections-div" class="require-selection section">
+  </div>
   <div class="require-selection section">
     <button>Generate</button> <button id="preview-button">See Page</button>
   </div>
 </body>
 <script type="text/javascript">
+  var contentCatalog;
+  var contentConfiguration;
+  var availableContentSections;
+
+  $.ajax({
+    url: "/api/1.0/ccat",
+    type: "GET",
+    cache: false,
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader("Accept", "application/json")
+    }
+  })
+  .then(function(data) {
+    contentCatalog = data;
+    checkComplete();
+  })
+  .catch(function(err) {
+    alert("Error loading content catalog.");
+  });
+
   $("#website-select").on("change", function() {
     checkComplete()
   })
@@ -105,18 +122,23 @@
   $("#model-input").on("change", function() {
     checkComplete()
   })
+
   function checkComplete() {
-    $("#the-rest").append($("<p style='color: #cc22bb'>").text("Loading..."));
-    if (websiteValue() && yearValue() && makeValue() && modelValue()) {
-      loadAndRenderSelection();
-    }
-    else {
-      $(".require-selection button").attr("disabled", true);
-      $(".require-selection input").attr("disabled", true);
-      $(".require-selection").removeClass("selection");
-      $("#preview-button").text("See Page");
+    if (contentCatalog) {
+      if (websiteValue() && yearValue() && makeValue() && modelValue()) {
+        $("#content-sections-div").append($("<p style='color: #cc22bb'>").text("Loading..."));
+        loadAndRenderSelection();
+      }
+      else {
+        $(".require-selection button").attr("disabled", true);
+        $(".require-selection input").attr("disabled", true);
+        $(".require-selection").removeClass("selection");
+        $("#preview-button").text("See Page");
+        $("#nimages-span").text("---")
+      }
     }
   }
+
   function loadAndRenderSelection() {
     loadWymmConfig().then(function() {
       loadImageCount().then(function() {
@@ -127,11 +149,54 @@
       })
     })
   }
+
   function loadWymmConfig() {
-    return {
-      then: function(f) {
-        f();
+    return $.ajax({
+      url: "/api/1.0/ccfg/" + getSlug(),
+      type: "GET",
+      cache: false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
       }
+    })
+    .then(function(data) {
+      contentConfiguration = data || {}
+      renderSections();
+    })
+    .catch(function(err) {
+      alert(err);
+    })
+  }
+
+  function renderSections() {
+    $("#content-sections-div").empty();
+    if (contentConfiguration && contentConfiguration.sections) {
+      var sections = contentConfiguration.sections;
+      for (var i = 0; i < sections.length; ++i) {
+        var row = $("<div>").append($("<span style='min-width: 200px'>").text(sections[i].name));
+        row.append($("<span>").text(" "));
+        var deleteButton = $("<button>×</button>");
+        row.append(deleteButton);
+        $("#content-sections-div").append(row);
+      }
+    }
+    var sectionSelect = renderSectionSelect();
+    if (sectionSelect) {
+      var addButton = $("<button>").text("Add section");
+      addButton.on("click", function() {
+        var sectionName = sectionSelect.find("option:selected").val();
+        if (sectionName) {
+          renderSections();
+        }
+      })
+      $("#content-sections-div").append($("<div>").append(sectionSelect).append(addButton));
+    }
+  }
+  function renderSectionSelect() {
+    if (availableContentSections.length) {
+      availableContentSections.sort();
+      var $select = $("<select>");
+      return $select;
     }
   }
   function loadImageCount() {
@@ -172,11 +237,14 @@
   function modelValue() {
     return $("#model-input").val()
   }
-  function modelDisplayValue() {
-    return modelValue().replace(/\s/g, "").toLowerCase();
+  function forDisplay(value) {
+    return value.replace(/[\s-]/g, "").toLowerCase();
   }
   function previewUrl() {
-    return "https://" + websiteValue() + "/v-" + yearValue() + "-" + makeValue() + "-" + modelDisplayValue();
+    return "https://" + websiteValue() + "/v-" + getSlug();
+  }
+  function getSlug() {
+    return forDisplay(yearValue()) + "-" + forDisplay(makeValue()) + "-" + forDisplay(modelValue())
   }
   checkComplete()
 </script>
