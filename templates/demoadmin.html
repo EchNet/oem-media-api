@@ -214,7 +214,7 @@
 
   function loadContentConfiguration() {
     return $.ajax({
-      url: "/api/1.0/ccfg/" + getSlug(),
+      url: "/api/1.0/ccfg/" + getContentKey(),
       type: "GET",
       cache: false,
       beforeSend: function(xhr) {
@@ -333,7 +333,7 @@
   $("#generate-button").on("click", function() {
     bindAllSectionVariants();
     saveContentConfiguration().then(function() {
-      var url = "/content/preview?website=" + websiteValue() + "&year=" + yearValue() + "&make=" + makeValue() + "&model=" + modelValue();
+      var url = "/content/preview?website=" + websiteValue() + "&slug=" + getSlug()
       window.open(url, "_blank");
     });
   });
@@ -388,14 +388,17 @@
   function modelValue() {
     return $("#model-input").val()
   }
-  function forDisplay(value) {
+  function forSlug(value) {
     return value.replace(/[\s-]/g, "").toLowerCase();
   }
   function previewUrl() {
     return "https://" + websiteValue() + "/v-" + getSlug();
   }
+  function getContentKey() {
+    return forSlug(websiteValue()) + "-" + getSlug();
+  }
   function getSlug() {
-    return forDisplay(yearValue()) + "-" + forDisplay(makeValue()) + "-" + forDisplay(modelValue())
+    return forSlug(yearValue()) + "-" + forSlug(makeValue()) + "-" + forSlug(modelValue())
   }
   checkComplete()
 </script>
