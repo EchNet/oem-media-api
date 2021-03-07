@@ -6,26 +6,43 @@
     body {
       font-family: Arial;
     }
+    .main {
+      max-width: 550px;
+      margin: auto;
+    }
     .error {
       color: red;
     }
     .require-selection:not(.selection) {
-      color: #ccc;
+      display: none;
     }
     .require-selection:not(.selection) td {
-      color: #ccc;
+      display: none;
     }
     .require-selection:not(.selection) th {
-      color: #ccc;
+      display: none;
     }
     table {
       margin-left: 50px;
     }
     .section {
       margin: 20px 30px;
+      line-height: 1.45;
     }
     .centered {
       text-align: center;
+    }
+    .indented {
+      padding-left: 30px;
+    }
+    li {
+      font-size: 15px;
+    }
+    li div {
+      display: inline-block;
+    }
+    li div:first-child {
+      min-width: 210px;
     }
     .row {
       display: flex;
@@ -35,122 +52,166 @@
   </style>
 </head>
 <body>
-  <h2 class="centered">OEM Interactive: SEO Landing Page Content Admin</h2>
-  <div class="section centered">
-    <select id="website-select">
-      <option value="">Select a website...</option>
-      <option>sparksparts.com</option>
-      <option>sneedparts.com</option>
-      <option value="">More to be added...</option>
-    </select>
-    <select id="year-select">
-      <option value="">Select a year...</option>
-      <option>2011</option>
-      <option>2010</option>
-      <option>2009</option>
-      <option>2008</option>
-      <option>2007</option>
-      <option>2006</option>
-      <option>2005</option>
-      <option>2004</option>
-      <option>2003</option>
-      <option>2002</option>
-      <option>2001</option>
-      <option>2000</option>
-    </select>
-    <select id="make-select">
-      <option value="">Select a make...</option>
-      <option value="audi">Audi</option>
-      <option value="fiat">Fiat</option>
-      <option value="ford">Ford</option>
-      <option value="gm">GM</option>
-      <option value="hyundai">Hyundai</option>
-      <option value="kia">Kia</option>
-      <option value="nissan">Nissan</option>
-      <option value="saab">Saab</option>
-      <option value="subaru">Subaru</option>
-      <option value="volkswagen">Volkswagen</option>
-      <option value="volvo">Volvo</option>
-      <option value="">More to be added...</option>
-    </select>
-    <input id="model-input" type="text" placeholder="Enter a model"/>
-  </div>
-  <div class="require-selection section row">
-    <span>Images available for this year/make/model: <b id="nimages-span">---</b></span>
-    <span><a href="test123">Add images</a></span>
-  </div>
-  <div class="require-selection section row">
-    <h3>Content sections:</h3>
-    <span><a href="ccat123">Add content</a></span>
-  </div>
-  <div id="content-sections-div" class="require-selection section">
-  </div>
-  <div class="require-selection section">
-    <button>Generate</button> <button id="preview-button">See Page</button>
+  <div class="main">
+    <h2 class="centered">OEM Interactive: SEO Landing Page Content Admin</h2>
+    <div class="section">
+      Assemble content for SEO landing pages here.
+    </div>
+    <div class="section centered">
+      <select id="website-select">
+        <option value="">Select a website...</option>
+        <option>sparksparts.com</option>
+        <option>sneedparts.com</option>
+        <option value="">More to be added...</option>
+      </select>
+      <select id="year-select">
+        <option value="">Select a year...</option>
+        <option>2021</option>
+        <option>2020</option>
+        <option>2019</option>
+        <option>2018</option>
+        <option>2017</option>
+        <option>2016</option>
+        <option>2015</option>
+        <option>2014</option>
+        <option>2013</option>
+        <option>2012</option>
+        <option>2011</option>
+        <option>2010</option>
+      </select>
+      <select id="make-select">
+        <option value="">Select a make...</option>
+        <option value="audi">Audi</option>
+        <option value="fiat">Fiat</option>
+        <option value="ford">Ford</option>
+        <option value="gm">GM</option>
+        <option value="hyundai">Hyundai</option>
+        <option value="kia">Kia</option>
+        <option value="nissan">Nissan</option>
+        <option value="saab">Saab</option>
+        <option value="subaru">Subaru</option>
+        <option value="volkswagen">Volkswagen</option>
+        <option value="volvo">Volvo</option>
+        <option value="">More to be added...</option>
+      </select>
+      <input id="model-input" type="text" placeholder="Enter a model"/>
+    </div>
+    <div class="require-selection section row">
+      <span>Images available for this year/make/model: <b id="nimages-span">---</b></span>
+      <span><a href="test123">Add images</a></span>
+    </div>
+    <div class="require-selection section row">
+      <h3>Page Table of Contents:</h3>
+      <span><a href="ccat123">See content catalog</a></span>
+    </div>
+    <div class="require-selection">
+      <ul id="content-sections-list">
+      </ul>
+      <div class="indented"><select id="section-select"></select>
+      <button id="add-section-button">Add section</button>
+    </div>
+    <div class="require-selection section centered">
+      <button id="generate-button">Generate</button>
+    </div>
   </div>
 </body>
 <script type="text/javascript">
-  var contentCatalog;
+  var contentSections;
+  var contentVariants;
   var contentConfiguration;
-  var availableContentSections;
+  var contentIndex;
 
-  $.ajax({
-    url: "/api/1.0/ccat",
-    type: "GET",
-    cache: false,
-    beforeSend: function(xhr) {
-      xhr.setRequestHeader("Accept", "application/json")
+  function loadSections() {
+    return $.ajax({
+      url: "/api/1.0/cs",
+      type: "GET",
+      cache: false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      }
+    })
+    .then(function(data) {
+      contentSections = data;
+    })
+    .catch(function(err) {
+      alert("Error loading content catalog.");
+    });
+  }
+
+  function loadVariants() {
+    return $.ajax({
+      url: "/api/1.0/cv",
+      type: "GET",
+      cache: false,
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      }
+    })
+    .then(function(data) {
+      contentVariants = data;
+    })
+    .catch(function(err) {
+      alert("Error loading content catalog.");
+    });
+  }
+
+  function buildContentIndex() {
+    contentIndex = {
+      byId: {},
+      byName: {}
+    };
+    for (var i = 0; i < contentSections.length; ++i) {
+      var cs = contentSections[i];
+      cs.variants = [];
+      contentIndex.byId[cs.id] = cs;
+      contentIndex.byName[cs.name] = cs;
     }
-  })
-  .then(function(data) {
-    contentCatalog = data;
-    checkComplete();
-  })
-  .catch(function(err) {
-    alert("Error loading content catalog.");
+    for (var i = 0; i < contentVariants.length; ++i) {
+      var cv = contentVariants[i];
+      contentIndex.byId[cv.section].variants.push(cv)
+    }
+  }
+
+  loadSections().then(function() {
+    loadVariants().then(function() {
+      buildContentIndex();
+    })
   });
 
-  $("#website-select").on("change", function() {
-    checkComplete()
-  })
-  $("#year-select").on("change", function() {
-    checkComplete()
-  })
-  $("#make-select").on("change", function() {
-    checkComplete()
-  })
-  $("#model-input").on("change", function() {
-    checkComplete()
-  })
+  $("#website-select").on("change", checkComplete);
+  $("#year-select").on("change", checkComplete);
+  $("#make-select").on("change", checkComplete);
+  $("#model-input").on("change", checkComplete);
 
   function checkComplete() {
-    if (contentCatalog) {
+    if (contentSections) {
       if (websiteValue() && yearValue() && makeValue() && modelValue()) {
-        $("#content-sections-div").append($("<p style='color: #cc22bb'>").text("Loading..."));
         loadAndRenderSelection();
       }
       else {
         $(".require-selection button").attr("disabled", true);
         $(".require-selection input").attr("disabled", true);
         $(".require-selection").removeClass("selection");
-        $("#preview-button").text("See Page");
+        $("#generate-button").text("Generate");
+        $("#generate-button").attr("disabled", true)
         $("#nimages-span").text("---")
       }
     }
   }
 
   function loadAndRenderSelection() {
-    loadWymmConfig().then(function() {
+    loadContentConfiguration().then(function() {
       loadImageCount().then(function() {
         $(".require-selection button").attr("disabled", false);
         $(".require-selection input").attr("disabled", false);
         $(".require-selection").addClass("selection");
-        $("#preview-button").text("See " + previewUrl());
+        $("#generate-button").text("Generate " + previewUrl());
+        $("#generate-button").attr("disabled", false);
       })
     })
   }
 
-  function loadWymmConfig() {
+  function loadContentConfiguration() {
     return $.ajax({
       url: "/api/1.0/ccfg/" + getSlug(),
       type: "GET",
@@ -160,45 +221,89 @@
       }
     })
     .then(function(data) {
-      contentConfiguration = data || {}
+      contentConfiguration = data;
       renderSections();
     })
     .catch(function(err) {
-      alert(err);
+      if (err.status == 404) {
+        contentConfiguration = { sections: [] };
+        renderSections();
+      }
+      else {
+        alert(err);
+      }
     })
   }
 
   function renderSections() {
-    $("#content-sections-div").empty();
+    $("#content-sections-list").empty();
     if (contentConfiguration && contentConfiguration.sections) {
       var sections = contentConfiguration.sections;
       for (var i = 0; i < sections.length; ++i) {
-        var row = $("<div>").append($("<span style='min-width: 200px'>").text(sections[i].name));
-        row.append($("<span>").text(" "));
-        var deleteButton = $("<button>×</button>");
-        row.append(deleteButton);
-        $("#content-sections-div").append(row);
+        var row = renderSection(sections[i]);
+        $("#content-sections-list").append(row);
       }
     }
-    var sectionSelect = renderSectionSelect();
-    if (sectionSelect) {
-      var addButton = $("<button>").text("Add section");
-      addButton.on("click", function() {
-        var sectionName = sectionSelect.find("option:selected").val();
-        if (sectionName) {
+    renderSectionSelect();
+  }
+
+  function renderSection(section) {
+    var row = $("<li>").append($("<div>").text(section.name));
+    var deleteButton = $("<button>×</button>");
+    row.append(deleteButton);
+    deleteButton.on("click", function() {
+      removeSection(section);
+    })
+    $("#content-sections-list").append(row);
+    return row;
+  }
+
+  function removeSection(section) {
+    if (contentConfiguration && contentConfiguration.sections) {
+      var sections = contentConfiguration.sections;
+      for (var i = 0; i < sections.length; ++i) {
+        if (sections[i] == section) {
+          sections.splice(i, 1);
           renderSections();
+          break;
         }
-      })
-      $("#content-sections-div").append($("<div>").append(sectionSelect).append(addButton));
+      }
     }
   }
+
+  $("#add-section-button").on("click", function() {
+    var option = $("#section-select").find("option:selected");
+    if (option.val()) {
+      var sectionId = option.val();
+      var sectionName = option.text();
+      console.log(sectionId, sectionName);
+      contentConfiguration.sections.push({ sid: sectionId, name: sectionName });
+      renderSections();
+    }
+  })
+
   function renderSectionSelect() {
-    if (availableContentSections.length) {
-      availableContentSections.sort();
-      var $select = $("<select>");
-      return $select;
+    var $select = $("#section-select");
+    $select.empty();
+    console.log(contentSections);
+    console.log(contentConfiguration.sections);
+    if (contentConfiguration && contentConfiguration.sections) {
+      var availableSections = contentSections.filter(function(cs) {
+        return !contentConfiguration.sections.find(function(ccs) { return ccs.sid == cs.id; })
+      });
+      if (!availableSections.length) {
+        $select.append($("<option value=''>-- No available sections --</option>"));
+      }
+      else {
+        $select.append($("<option value=''>Select a section to add</option>"));
+      }
+      for (var i = 0; i < availableSections.length; ++i) {
+        var cs = availableSections[i];
+        $select.append($("<option>").text(cs.name).attr("value", cs.id))
+      }
     }
   }
+
   function loadImageCount() {
     return $.ajax({
       url: "/api/1.0/media",
@@ -225,6 +330,7 @@
       alert(err);
     })
   }
+
   function websiteValue() {
     return $("#website-select option:selected").val()
   }

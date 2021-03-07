@@ -1,5 +1,6 @@
 import logging
 
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, views
 from rest_framework.response import Response
 
@@ -27,3 +28,10 @@ class ListCreateContentVariantView(generics.ListCreateAPIView):
 class RetrieveUpdateContentVariantView(generics.RetrieveUpdateAPIView):
   queryset = models.ContentVariant.objects.exclude(deleted=True)
   serializer_class = serializers.ContentVariantSerializer
+
+
+class RetrieveContentConfigurationView(generics.RetrieveAPIView):
+  def retrieve(self, request, *args, **kwargs):
+    key = kwargs.get("key")
+    obj = get_object_or_404(models.ContentConfiguration.objects.all(), key=key)
+    return serializers.ContentConfigurationSerializer(obj).data
