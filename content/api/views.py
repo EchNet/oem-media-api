@@ -34,4 +34,15 @@ class RetrieveContentConfigurationView(generics.RetrieveAPIView):
   def retrieve(self, request, *args, **kwargs):
     key = kwargs.get("key")
     obj = get_object_or_404(models.ContentConfiguration.objects.all(), key=key)
-    return serializers.ContentConfigurationSerializer(obj).data
+    data = serializers.ContentConfigurationSerializer(obj).data
+    return Response(data)
+
+
+class CreateContentConfigurationView(generics.CreateAPIView):
+  def create(self, request, *args, **kwargs):
+    key = request.data.get("key")
+    config = request.data.get("config")
+    obj, _created = models.ContentConfiguration.objects.update_or_create(
+        key=key, defaults={"config": config})
+    data = serializers.ContentConfigurationSerializer(obj).data
+    return Response(data)

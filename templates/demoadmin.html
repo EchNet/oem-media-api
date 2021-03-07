@@ -120,6 +120,7 @@
   var contentVariants;
   var contentConfiguration;
   var contentIndex;
+  var currentImages;
 
   function loadSections() {
     return $.ajax({
@@ -201,7 +202,7 @@
 
   function loadAndRenderSelection() {
     loadContentConfiguration().then(function() {
-      loadImageCount().then(function() {
+      loadImages().then(function() {
         $(".require-selection button").attr("disabled", false);
         $(".require-selection input").attr("disabled", false);
         $(".require-selection").addClass("selection");
@@ -226,7 +227,7 @@
     })
     .catch(function(err) {
       if (err.status == 404) {
-        contentConfiguration = { sections: [] };
+        contentConfiguration = { key: getSlug(), config: { sections: [] }};
         renderSections();
       }
       else {
@@ -237,8 +238,8 @@
 
   function renderSections() {
     $("#content-sections-list").empty();
-    if (contentConfiguration && contentConfiguration.sections) {
-      var sections = contentConfiguration.sections;
+    if (contentConfiguration && contentConfiguration.config.sections) {
+      var sections = contentConfiguration.config.sections;
       for (var i = 0; i < sections.length; ++i) {
         var row = renderSection(sections[i]);
         $("#content-sections-list").append(row);
@@ -259,8 +260,8 @@
   }
 
   function removeSection(section) {
-    if (contentConfiguration && contentConfiguration.sections) {
-      var sections = contentConfiguration.sections;
+    if (contentConfiguration && contentConfiguration.config.sections) {
+      var sections = contentConfiguration.config.sections;
       for (var i = 0; i < sections.length; ++i) {
         if (sections[i] == section) {
           sections.splice(i, 1);
@@ -276,8 +277,7 @@
     if (option.val()) {
       var sectionId = option.val();
       var sectionName = option.text();
-      console.log(sectionId, sectionName);
-      contentConfiguration.sections.push({ sid: sectionId, name: sectionName });
+      contentConfiguration.config.sections.push({ sid: sectionId, name: sectionName });
       renderSections();
     }
   })
@@ -285,11 +285,9 @@
   function renderSectionSelect() {
     var $select = $("#section-select");
     $select.empty();
-    console.log(contentSections);
-    console.log(contentConfiguration.sections);
-    if (contentConfiguration && contentConfiguration.sections) {
+    if (contentConfiguration && contentConfiguration.config.sections) {
       var availableSections = contentSections.filter(function(cs) {
-        return !contentConfiguration.sections.find(function(ccs) { return ccs.sid == cs.id; })
+        return !contentConfiguration.config.sections.find(function(ccs) { return ccs.sid == cs.id; })
       });
       if (!availableSections.length) {
         $select.append($("<option value=''>-- No available sections --</option>"));
@@ -304,7 +302,7 @@
     }
   }
 
-  function loadImageCount() {
+  function loadImages() {
     return $.ajax({
       url: "/api/1.0/media",
       type: "GET",
@@ -319,6 +317,7 @@
       }
     })
     .then(function(data) {
+      currentImages = data;
       if (!data || !data.length) {
         $("#nimages-span").text("None")
       }
@@ -328,6 +327,52 @@
     })
     .catch(function(err) {
       alert(err);
+    })
+  }
+
+  $("#generate-button").on("click", function() {
+    bindAllSectionVariants();
+    saveContentConfiguration().then(function() {
+      var url = "/content/preview?website=" + websiteValue() + "&year=" + yearValue() + "&make=" + makeValue() + "&model=" + modelValue();
+      window.open(url, "_blank");
+    });
+  });
+
+  function bindAllSectionVariants() {
+    var sections = contentConfiguration.config.sections;
+    for (var i = 0; i < sections.length; ++i) {
+      var section = sections[i];
+      section.vid = chooseVariant(section.sid);
+    }
+    contentConfiguration.config.image = chooseImage();
+  }
+
+  function chooseVariant(sectionId) {
+    var variants = contentIndex.byId[sectionId].variants;
+    var n = contentIndex.byId[sectionId].variants.length;
+    var index = Math.floor(Math.random() * n);
+    return variants[index].id;
+  }
+
+  function chooseImage() {
+    if (currentImages && currentImages.length) {
+      var n = currentImages.length;
+      var index = Math.floor(Math.random() * n);
+      return currentImages[index];
+    }
+    return null;
+  }
+
+  function saveContentConfiguration() {
+    return $.ajax({
+      url: "/api/1.0/ccfg",
+      data: JSON.stringify(contentConfiguration),
+      type: "POST",
+      contentType: "application/json",
+      dataType: "json",
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Accept", "application/json")
+      }
     })
   }
 
