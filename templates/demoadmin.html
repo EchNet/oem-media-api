@@ -231,6 +231,9 @@
     .catch(function(err) {
       if (err.status == 404) {
         contentConfiguration = { key: getContentKey(), config: { sections: [] }};
+        for (var i = 0; i < contentSections.length; ++i) {
+          addSectionToConfiguration(contentSections[i]);
+        }
         renderSections();
       }
       else {
@@ -279,11 +282,16 @@
     var option = $("#section-select").find("option:selected");
     if (option.val()) {
       var sectionId = option.val();
-      var sectionName = option.text();
-      contentConfiguration.config.sections.push({ sid: sectionId, name: sectionName });
+      addSectionToConfiguration(contentSections.byId[sectionId]);
       renderSections();
     }
   })
+
+  function addSectionToConfiguration(section) {
+    var sectionId = section.id;
+    var sectionName = section.name;
+    contentConfiguration.config.sections.push({ sid: sectionId, name: sectionName });
+  }
 
   function renderSectionSelect() {
     var $select = $("#section-select");
