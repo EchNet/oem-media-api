@@ -2,6 +2,7 @@ import logging
 import requests
 
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template import Template, Context
@@ -67,14 +68,17 @@ class PageBuilder:
     cv = models.ContentVariant.objects.get(id=variant_id)
     template = Template(cv.text)
     year, make, model = self.slug.split("-")
-    make = make.capitalize()
-    model = model.capitalize()
+    Make = make.capitalize()
+    Model = model.capitalize()
     website = self.website
     context = Context({
-        "year": year,
+        "Make": Make,
+        "Model": Model,
         "make": make,
         "model": model,
+        "server_host": settings.SITE_URL,
         "website": website,
+        "year": year,
     })
     return template.render(context)
 

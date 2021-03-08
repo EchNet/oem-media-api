@@ -26,8 +26,6 @@ class ListCreateMediaFileView(generics.ListCreateAPIView):
     for key, value in self.request.query_params.items():
       if key.isalnum() and value and value.isalnum():
         queryset = queryset.filter(tags__key=key, tags__value=value)
-    logger.debug(queryset.query)
-    logger.debug(queryset.count())
     return queryset
 
   def create(self, request):
@@ -37,5 +35,5 @@ class ListCreateMediaFileView(generics.ListCreateAPIView):
     media_file = serializer.save()
     for key, value in self.request.POST.items():
       if not key in ("file", "submit"):
-        models.MediaFileTag.objects.create(media_file=media_file, key=key, value=value)
+        models.MediaFileTag.objects.create(media_file=media_file, key=key, value=value.lower())
     return Response(serializer.data, status.HTTP_201_CREATED)
