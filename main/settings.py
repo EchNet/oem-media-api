@@ -46,7 +46,7 @@ INSTALLED_APPS = (
 
     # custom apps
     "content",
-    "core",
+    "media",
 )
 
 MIDDLEWARE = (
@@ -137,7 +137,7 @@ SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", cast=bool, default=True)
 # Static files
 SERVE_MEDIA = DEBUG
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(SITE_ROOT, "media")
+MEDIA_ROOT = os.path.join(SITE_ROOT, "storage")
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(SITE_ROOT, "static")

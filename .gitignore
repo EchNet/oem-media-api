@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 venv/
 static/
-media/
+storage/
 .env
 dump.rdb
 requirements.flag

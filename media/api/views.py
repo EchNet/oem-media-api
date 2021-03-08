@@ -5,8 +5,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, parsers, status, views
 from rest_framework.response import Response
 
-from core import models
-from core.api import serializers
+from media import models
+from . import serializers
 
 logger = logging.getLogger(__name__)
 
