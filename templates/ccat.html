@@ -36,6 +36,12 @@
     <div class="section centered">
       <select id="section-select"><option value="">-- No sections --</option></select>
       <input type="text" id="section-name-input" placeholder="New section name"/>
+      <select id="slot-select">
+        <option>body</option>
+        <option>header</option>
+        <option>footer</option>
+        <option>meta</option>
+      </select>
       <button id="add-section-button">Add</button>
     </div>
     <div class="section row" id="variant-nav-div" style="display:none">
@@ -146,9 +152,10 @@
       alert("That section already exists.")
       return;
     }
+    var slot = $("#slot-select").find("option:selected").val();
     $.ajax({
       url: "/api/1.0/cs",
-      data: JSON.stringify({ name: sectionName }),
+      data: JSON.stringify({ name: sectionName, slot: slot }),
       type: "POST",
       contentType: "application/json",
       dataType: "json",
@@ -239,6 +246,19 @@
       alert("Error loading content.");
     });
   }
+
+  $("#prev-variant-link").on("click", function() {
+    if (currentVariantIndex > 0) {
+      currentVariantIndex -= 1;
+      renderCurrentVariant();
+    }
+  })
+  $("#next-variant-link").on("click", function() {
+    if (currentVariantIndex < currentSection.variants.length - 1) {
+      currentVariantIndex += 1;
+      renderCurrentVariant();
+    }
+  })
 
   $("#add-variant-button").on("click", function() {
     if (!currentSection) return;

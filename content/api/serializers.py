@@ -6,7 +6,7 @@ from content.models import ContentConfiguration, ContentSection, ContentVariant
 class ContentSectionSerializer(serializers.ModelSerializer):
   class Meta:
     model = ContentSection
-    fields = ("id", "name")
+    fields = ("id", "name", "slot")
 
 
 class ContentVariantSerializer(serializers.ModelSerializer):

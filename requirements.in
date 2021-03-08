@@ -5,6 +5,7 @@
 
 Django
 boto3
+bs4
 django-debug-toolbar
 django-admin-autocomplete-filter
 django-cors-headers

@@ -13,7 +13,7 @@ class ContentConfiguration(models.Model):
       db_index=True,
       null=False,
       unique=True,
-      verbose_name=_("website"),
+      verbose_name=_("key"),
   )
 
   # Unstructured value.
@@ -31,6 +31,17 @@ class ContentSection(models.Model):
       max_length=16,
       unique=True,
       verbose_name=_("section id"),
+  )
+
+  # The slot, or area of the page where this section should appear.
+  slot = models.CharField(
+      blank=False,
+      choices=(("meta", "meta"), ("header", "header"), ("body", "body"), ("footer", "footer")),
+      default="body",
+      db_index=True,
+      null=False,
+      max_length=16,
+      verbose_name=_("slot"),
   )
 
 

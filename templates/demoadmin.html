@@ -64,6 +64,8 @@
         <option>sneedparts.com</option>
         <option value="">More to be added...</option>
       </select>
+    </div>
+    <div class="section centered">
       <select id="year-select">
         <option value="">Select a year...</option>
         <option>2021</option>
@@ -90,6 +92,7 @@
         <option value="nissan">Nissan</option>
         <option value="saab">Saab</option>
         <option value="subaru">Subaru</option>
+        <option value="toyota">Toyota</option>
         <option value="volkswagen">Volkswagen</option>
         <option value="volvo">Volvo</option>
         <option value="">More to be added...</option>
@@ -227,7 +230,7 @@
     })
     .catch(function(err) {
       if (err.status == 404) {
-        contentConfiguration = { key: getSlug(), config: { sections: [] }};
+        contentConfiguration = { key: getContentKey(), config: { sections: [] }};
         renderSections();
       }
       else {
