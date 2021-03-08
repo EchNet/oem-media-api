@@ -31,7 +31,7 @@ class RetrieveUpdateContentVariantView(generics.RetrieveUpdateAPIView):
 
 
 class RetrieveContentConfigurationView(generics.RetrieveAPIView):
-  def retrieve(self, request, *args, **kwargs):
+  def get(self, request, *args, **kwargs):
     key = kwargs.get("key")
     obj = get_object_or_404(models.ContentConfiguration.objects.all(), key=key)
     data = serializers.ContentConfigurationSerializer(obj).data
