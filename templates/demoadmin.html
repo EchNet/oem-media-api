@@ -1,57 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <style>
-    body {
-      font-family: Arial;
-    }
-    .main {
-      max-width: 550px;
-      margin: auto;
-    }
-    .error {
-      color: red;
-    }
-    .require-selection:not(.selection) {
-      display: none;
-    }
-    .require-selection:not(.selection) td {
-      display: none;
-    }
-    .require-selection:not(.selection) th {
-      display: none;
-    }
-    table {
-      margin-left: 50px;
-    }
-    .section {
-      margin: 20px 30px;
-      line-height: 1.45;
-    }
-    .centered {
-      text-align: center;
-    }
-    .indented {
-      padding-left: 30px;
-    }
-    li {
-      font-size: 15px;
-    }
-    li div {
-      display: inline-block;
-    }
-    li div:first-child {
-      min-width: 210px;
-    }
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-  </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
   <div class="main">
     <h2 class="centered">OEM Interactive: SEO Landing Page Content Admin</h2>
     <div class="section">
@@ -117,300 +66,303 @@
       <button id="generate-button">Generate</button>
     </div>
   </div>
-</body>
-<script type="text/javascript">
-  var contentSections;
-  var contentVariants;
-  var contentConfiguration;
-  var contentIndex;
-  var currentImages;
+{% endblock content %}
 
-  function loadSections() {
-    return $.ajax({
-      url: "/api/1.0/cs",
-      type: "GET",
-      cache: false,
-      beforeSend: function(xhr) {
-        xhr.setRequestHeader("Accept", "application/json")
-      }
-    })
-    .then(function(data) {
-      contentSections = data;
-    })
-    .catch(function(err) {
-      alert("Error loading content catalog.");
-    });
-  }
+{% block load-last %}
+  <script type="text/javascript">
+    var contentSections;
+    var contentVariants;
+    var contentConfiguration;
+    var contentIndex;
+    var currentImages;
 
-  function loadVariants() {
-    return $.ajax({
-      url: "/api/1.0/cv",
-      type: "GET",
-      cache: false,
-      beforeSend: function(xhr) {
-        xhr.setRequestHeader("Accept", "application/json")
-      }
-    })
-    .then(function(data) {
-      contentVariants = data;
-    })
-    .catch(function(err) {
-      alert("Error loading content catalog.");
-    });
-  }
-
-  function buildContentIndex() {
-    contentIndex = {
-      byId: {},
-      byName: {}
-    };
-    for (var i = 0; i < contentSections.length; ++i) {
-      var cs = contentSections[i];
-      cs.variants = [];
-      contentIndex.byId[cs.id] = cs;
-      contentIndex.byName[cs.name] = cs;
-    }
-    for (var i = 0; i < contentVariants.length; ++i) {
-      var cv = contentVariants[i];
-      contentIndex.byId[cv.section].variants.push(cv)
-    }
-  }
-
-  loadSections().then(function() {
-    loadVariants().then(function() {
-      buildContentIndex();
-    })
-  });
-
-  $("#website-select").on("change", checkComplete);
-  $("#year-select").on("change", checkComplete);
-  $("#make-select").on("change", checkComplete);
-  $("#model-input").on("change", checkComplete);
-
-  function checkComplete() {
-    if (contentSections) {
-      if (websiteValue() && yearValue() && makeValue() && modelValue()) {
-        loadAndRenderSelection();
-      }
-      else {
-        $(".require-selection button").attr("disabled", true);
-        $(".require-selection input").attr("disabled", true);
-        $(".require-selection").removeClass("selection");
-        $("#generate-button").text("Generate");
-        $("#generate-button").attr("disabled", true)
-        $("#nimages-span").text("---")
-      }
-    }
-  }
-
-  function loadAndRenderSelection() {
-    loadContentConfiguration().then(function() {
-      loadImages().then(function() {
-        $(".require-selection button").attr("disabled", false);
-        $(".require-selection input").attr("disabled", false);
-        $(".require-selection").addClass("selection");
-        $("#generate-button").text("Generate " + previewUrl());
-        $("#generate-button").attr("disabled", false);
-      })
-    })
-  }
-
-  function loadContentConfiguration() {
-    return $.ajax({
-      url: "/api/1.0/ccfg/" + getContentKey(),
-      type: "GET",
-      cache: false,
-      beforeSend: function(xhr) {
-        xhr.setRequestHeader("Accept", "application/json")
-      }
-    })
-    .then(function(data) {
-      contentConfiguration = data;
-      renderSections();
-    })
-    .catch(function(err) {
-      if (err.status == 404) {
-        contentConfiguration = { key: getContentKey(), config: { sections: [] }};
-        for (var i = 0; i < contentSections.length; ++i) {
-          addSectionToConfiguration(contentSections[i]);
+    function loadSections() {
+      return $.ajax({
+        url: "/api/1.0/cs",
+        type: "GET",
+        cache: false,
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("Accept", "application/json")
         }
+      })
+      .then(function(data) {
+        contentSections = data;
+      })
+      .catch(function(err) {
+        alert("Error loading content catalog.");
+      });
+    }
+
+    function loadVariants() {
+      return $.ajax({
+        url: "/api/1.0/cv",
+        type: "GET",
+        cache: false,
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("Accept", "application/json")
+        }
+      })
+      .then(function(data) {
+        contentVariants = data;
+      })
+      .catch(function(err) {
+        alert("Error loading content catalog.");
+      });
+    }
+
+    function buildContentIndex() {
+      contentIndex = {
+        byId: {},
+        byName: {}
+      };
+      for (var i = 0; i < contentSections.length; ++i) {
+        var cs = contentSections[i];
+        cs.variants = [];
+        contentIndex.byId[cs.id] = cs;
+        contentIndex.byName[cs.name] = cs;
+      }
+      for (var i = 0; i < contentVariants.length; ++i) {
+        var cv = contentVariants[i];
+        contentIndex.byId[cv.section].variants.push(cv)
+      }
+    }
+
+    loadSections().then(function() {
+      loadVariants().then(function() {
+        buildContentIndex();
+      })
+    });
+
+    $("#website-select").on("change", checkComplete);
+    $("#year-select").on("change", checkComplete);
+    $("#make-select").on("change", checkComplete);
+    $("#model-input").on("change", checkComplete);
+
+    function checkComplete() {
+      if (contentSections) {
+        if (websiteValue() && yearValue() && makeValue() && modelValue()) {
+          loadAndRenderSelection();
+        }
+        else {
+          $(".require-selection button").attr("disabled", true);
+          $(".require-selection input").attr("disabled", true);
+          $(".require-selection").removeClass("selection");
+          $("#generate-button").text("Generate");
+          $("#generate-button").attr("disabled", true)
+          $("#nimages-span").text("---")
+        }
+      }
+    }
+
+    function loadAndRenderSelection() {
+      loadContentConfiguration().then(function() {
+        loadImages().then(function() {
+          $(".require-selection button").attr("disabled", false);
+          $(".require-selection input").attr("disabled", false);
+          $(".require-selection").addClass("selection");
+          $("#generate-button").text("Generate " + previewUrl());
+          $("#generate-button").attr("disabled", false);
+        })
+      })
+    }
+
+    function loadContentConfiguration() {
+      return $.ajax({
+        url: "/api/1.0/ccfg/" + getContentKey(),
+        type: "GET",
+        cache: false,
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("Accept", "application/json")
+        }
+      })
+      .then(function(data) {
+        contentConfiguration = data;
+        renderSections();
+      })
+      .catch(function(err) {
+        if (err.status == 404) {
+          contentConfiguration = { key: getContentKey(), config: { sections: [] }};
+          for (var i = 0; i < contentSections.length; ++i) {
+            addSectionToConfiguration(contentSections[i]);
+          }
+          renderSections();
+        }
+        else {
+          alert(err);
+        }
+      })
+    }
+
+    function renderSections() {
+      $("#content-sections-list").empty();
+      if (contentConfiguration && contentConfiguration.config.sections) {
+        var sections = contentConfiguration.config.sections;
+        for (var i = 0; i < sections.length; ++i) {
+          var row = renderSection(sections[i]);
+          $("#content-sections-list").append(row);
+        }
+      }
+      renderSectionSelect();
+    }
+
+    function renderSection(section) {
+      var row = $("<li>").append($("<div>").text(section.name));
+      var deleteButton = $("<button>×</button>");
+      row.append(deleteButton);
+      deleteButton.on("click", function() {
+        removeSection(section);
+      })
+      $("#content-sections-list").append(row);
+      return row;
+    }
+
+    function removeSection(section) {
+      if (contentConfiguration && contentConfiguration.config.sections) {
+        var sections = contentConfiguration.config.sections;
+        for (var i = 0; i < sections.length; ++i) {
+          if (sections[i] == section) {
+            sections.splice(i, 1);
+            renderSections();
+            break;
+          }
+        }
+      }
+    }
+
+    $("#add-section-button").on("click", function() {
+      var option = $("#section-select").find("option:selected");
+      if (option.val()) {
+        var sectionId = option.val();
+        addSectionToConfiguration(contentSections.byId[sectionId]);
         renderSections();
       }
-      else {
-        alert(err);
-      }
     })
-  }
 
-  function renderSections() {
-    $("#content-sections-list").empty();
-    if (contentConfiguration && contentConfiguration.config.sections) {
-      var sections = contentConfiguration.config.sections;
-      for (var i = 0; i < sections.length; ++i) {
-        var row = renderSection(sections[i]);
-        $("#content-sections-list").append(row);
-      }
+    function addSectionToConfiguration(section) {
+      var sectionId = section.id;
+      var sectionName = section.name;
+      contentConfiguration.config.sections.push({ sid: sectionId, name: sectionName });
     }
-    renderSectionSelect();
-  }
 
-  function renderSection(section) {
-    var row = $("<li>").append($("<div>").text(section.name));
-    var deleteButton = $("<button>×</button>");
-    row.append(deleteButton);
-    deleteButton.on("click", function() {
-      removeSection(section);
-    })
-    $("#content-sections-list").append(row);
-    return row;
-  }
-
-  function removeSection(section) {
-    if (contentConfiguration && contentConfiguration.config.sections) {
-      var sections = contentConfiguration.config.sections;
-      for (var i = 0; i < sections.length; ++i) {
-        if (sections[i] == section) {
-          sections.splice(i, 1);
-          renderSections();
-          break;
+    function renderSectionSelect() {
+      var $select = $("#section-select");
+      $select.empty();
+      if (contentConfiguration && contentConfiguration.config.sections) {
+        var availableSections = contentSections.filter(function(cs) {
+          return !contentConfiguration.config.sections.find(function(ccs) { return ccs.sid == cs.id; })
+        });
+        if (!availableSections.length) {
+          $select.append($("<option value=''>-- No available sections --</option>"));
+        }
+        else {
+          $select.append($("<option value=''>Select a section to add</option>"));
+        }
+        for (var i = 0; i < availableSections.length; ++i) {
+          var cs = availableSections[i];
+          $select.append($("<option>").text(cs.name).attr("value", cs.id))
         }
       }
     }
-  }
 
-  $("#add-section-button").on("click", function() {
-    var option = $("#section-select").find("option:selected");
-    if (option.val()) {
-      var sectionId = option.val();
-      addSectionToConfiguration(contentSections.byId[sectionId]);
-      renderSections();
+    function loadImages() {
+      return $.ajax({
+        url: "/api/1.0/media",
+        type: "GET",
+        data: {
+          year: yearValue(),
+          make: makeValue(),
+          model: modelValue()
+        },
+        cache: false,
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("Accept", "application/json")
+        }
+      })
+      .then(function(data) {
+        currentImages = data;
+        if (!data || !data.length) {
+          $("#nimages-span").text("None")
+        }
+        else {
+          $("#nimages-span").text("" + data.length)
+        }
+      })
+      .catch(function(err) {
+        alert(err);
+      })
     }
-  })
 
-  function addSectionToConfiguration(section) {
-    var sectionId = section.id;
-    var sectionName = section.name;
-    contentConfiguration.config.sections.push({ sid: sectionId, name: sectionName });
-  }
-
-  function renderSectionSelect() {
-    var $select = $("#section-select");
-    $select.empty();
-    if (contentConfiguration && contentConfiguration.config.sections) {
-      var availableSections = contentSections.filter(function(cs) {
-        return !contentConfiguration.config.sections.find(function(ccs) { return ccs.sid == cs.id; })
+    $("#generate-button").on("click", function() {
+      bindAllSectionVariants();
+      saveContentConfiguration().then(function() {
+        var url = "/content/preview?website=" + websiteValue() + "&slug=" + getSlug()
+        window.open(url, "_blank");
       });
-      if (!availableSections.length) {
-        $select.append($("<option value=''>-- No available sections --</option>"));
-      }
-      else {
-        $select.append($("<option value=''>Select a section to add</option>"));
-      }
-      for (var i = 0; i < availableSections.length; ++i) {
-        var cs = availableSections[i];
-        $select.append($("<option>").text(cs.name).attr("value", cs.id))
-      }
-    }
-  }
-
-  function loadImages() {
-    return $.ajax({
-      url: "/api/1.0/media",
-      type: "GET",
-      data: {
-        year: yearValue(),
-        make: makeValue(),
-        model: modelValue()
-      },
-      cache: false,
-      beforeSend: function(xhr) {
-        xhr.setRequestHeader("Accept", "application/json")
-      }
-    })
-    .then(function(data) {
-      currentImages = data;
-      if (!data || !data.length) {
-        $("#nimages-span").text("None")
-      }
-      else {
-        $("#nimages-span").text("" + data.length)
-      }
-    })
-    .catch(function(err) {
-      alert(err);
-    })
-  }
-
-  $("#generate-button").on("click", function() {
-    bindAllSectionVariants();
-    saveContentConfiguration().then(function() {
-      var url = "/content/preview?website=" + websiteValue() + "&slug=" + getSlug()
-      window.open(url, "_blank");
     });
-  });
 
-  function bindAllSectionVariants() {
-    var sections = contentConfiguration.config.sections;
-    for (var i = 0; i < sections.length; ++i) {
-      var section = sections[i];
-      section.vid = chooseVariant(section.sid);
-    }
-    contentConfiguration.config.image = chooseImage();
-  }
-
-  function chooseVariant(sectionId) {
-    var variants = contentIndex.byId[sectionId].variants;
-    var n = contentIndex.byId[sectionId].variants.length;
-    var index = Math.floor(Math.random() * n);
-    return variants[index].id;
-  }
-
-  function chooseImage() {
-    if (currentImages && currentImages.length) {
-      var n = currentImages.length;
-      var index = Math.floor(Math.random() * n);
-      return currentImages[index];
-    }
-    return null;
-  }
-
-  function saveContentConfiguration() {
-    return $.ajax({
-      url: "/api/1.0/ccfg",
-      data: JSON.stringify(contentConfiguration),
-      type: "POST",
-      contentType: "application/json",
-      dataType: "json",
-      beforeSend: function(xhr) {
-        xhr.setRequestHeader("Accept", "application/json")
+    function bindAllSectionVariants() {
+      var sections = contentConfiguration.config.sections;
+      for (var i = 0; i < sections.length; ++i) {
+        var section = sections[i];
+        section.vid = chooseVariant(section.sid);
       }
-    })
-  }
+      contentConfiguration.config.image = chooseImage();
+    }
 
-  function websiteValue() {
-    return $("#website-select option:selected").val()
-  }
-  function yearValue() {
-    return $("#year-select option:selected").val()
-  }
-  function makeValue() {
-    return $("#make-select option:selected").val()
-  }
-  function modelValue() {
-    return $("#model-input").val()
-  }
-  function forSlug(value) {
-    return value.replace(/[\s-]/g, "").toLowerCase();
-  }
-  function previewUrl() {
-    return "https://" + websiteValue() + "/v-" + getSlug();
-  }
-  function getContentKey() {
-    return forSlug(websiteValue()) + "-" + getSlug();
-  }
-  function getSlug() {
-    return forSlug(yearValue()) + "-" + forSlug(makeValue()) + "-" + forSlug(modelValue())
-  }
-  checkComplete()
-</script>
-</html>
+    function chooseVariant(sectionId) {
+      var variants = contentIndex.byId[sectionId].variants;
+      var n = contentIndex.byId[sectionId].variants.length;
+      var index = Math.floor(Math.random() * n);
+      return variants[index].id;
+    }
+
+    function chooseImage() {
+      if (currentImages && currentImages.length) {
+        var n = currentImages.length;
+        var index = Math.floor(Math.random() * n);
+        return currentImages[index];
+      }
+      return null;
+    }
+
+    function saveContentConfiguration() {
+      return $.ajax({
+        url: "/api/1.0/ccfg",
+        data: JSON.stringify(contentConfiguration),
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("Accept", "application/json")
+        }
+      })
+    }
+
+    function websiteValue() {
+      return $("#website-select option:selected").val()
+    }
+    function yearValue() {
+      return $("#year-select option:selected").val()
+    }
+    function makeValue() {
+      return $("#make-select option:selected").val()
+    }
+    function modelValue() {
+      return $("#model-input").val()
+    }
+    function forSlug(value) {
+      return value.replace(/[\s-]/g, "").toLowerCase();
+    }
+    function previewUrl() {
+      return "https://" + websiteValue() + "/v-" + getSlug();
+    }
+    function getContentKey() {
+      return forSlug(websiteValue()) + "-" + getSlug();
+    }
+    function getSlug() {
+      return forSlug(yearValue()) + "-" + forSlug(makeValue()) + "-" + forSlug(modelValue())
+    }
+    checkComplete()
+  </script>
+  </html>
+{% endblock load-last %}
