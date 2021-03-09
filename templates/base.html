@@ -18,6 +18,7 @@
   <body>
     {% block content %}{% endblock content %}
   </body>
-  {% block load-last %}{% endblock load-last %}
+  {% block load-last %}
+    <script type="text/javascript" src="{% static 'js/local.js' %}"></script>
+  {% endblock load-last %}
 </html>
-

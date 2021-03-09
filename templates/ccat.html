@@ -1,47 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <style>
-    body {
-      font-family: Arial;
-    }
-    .main {
-      max-width: 550px;
-      margin: auto;
-    }
-    .error {
-      color: red;
-    }
-    .section {
-      margin: 20px 30px;
-    }
-    .centered {
-      text-align: center;
-    }
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-    textarea {
-      width: 100%;
-      height: 200px;
-    }
-  </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
   <div class="main">
     <h2 class="centered">OEM Interactive: SEO Landing Page Content Catalog</h2>
+    <p>Define the content sections that make up SEO landing pages here.</p>
     <div class="section row">
       <select id="section-select"><option value="">-- No sections --</option></select>
       <span>
         <input type="text" id="section-name-input" placeholder="New section name"/>
         <select id="slot-select">
-          <option>body</option>
-          <option>header</option>
-          <option>footer</option>
-          <option>meta</option>
+          <option value="body">Appears in the main content of the page</option>
+          <option value="header">Appears in the page header</option>
+          <option value="footer">Appears in the page footer</option>
+          <option value="meta">Is a meta tag (does not appear in the page)</option>
         </select>
         <button id="add-section-button">Add</button>
       </span>
@@ -51,7 +22,7 @@
         Showing variant #<span id="variant-index-span"></span>
         of <span id="nvariants-span"></span>
       </span>
-      <span id="no-variants-span" style="display: none;">No content variants</span>
+      <span id="no-variants-span" style="display: none;">No content variants yet</span>
       <a href="#" id="prev-variant-link">Previous</a>
       <a href="#" id="next-variant-link">Next</a>
       <button id="add-variant-button">Add variant</button>
@@ -63,46 +34,16 @@
       <button id="save-button" style="display:none">Save</button>
     </div>
   </div>
-</body>
+{% endblock content %}
+
+{% block load-last %}
+{{ block.super }}
 <script type="text/javascript">
-  var contentSections;
-  var contentVariants;
-  var contentIndex;
   var currentSection;
   var currentVariantIndex;
 
-  function loadSections() {
-    return $.ajax({
-      url: "/api/1.0/cs",
-      type: "GET",
-      cache: false,
-      beforeSend: function(xhr) {
-        xhr.setRequestHeader("Accept", "application/json")
-      }
-    })
-    .then(function(data) {
-      contentSections = data;
-    })
-    .catch(function(err) {
-      alert("Error loading content catalog.");
-    });
-  }
-
-  function loadVariants() {
-    return $.ajax({
-      url: "/api/1.0/cv",
-      type: "GET",
-      cache: false,
-      beforeSend: function(xhr) {
-        xhr.setRequestHeader("Accept", "application/json")
-      }
-    })
-    .then(function(data) {
-      contentVariants = data;
-    })
-    .catch(function(err) {
-      alert("Error loading content catalog.");
-    });
+  function initApp() {
+    buildSectionSelect();
   }
 
   function buildSectionSelect() {
@@ -119,30 +60,6 @@
       $select.append($("<option>").text(cs.name).attr("value", cs.id))
     }
   }
-
-  function buildContentIndex() {
-    contentIndex = {
-      byId: {},
-      byName: {}
-    };
-    for (var i = 0; i < contentSections.length; ++i) {
-      var cs = contentSections[i];
-      cs.variants = [];
-      contentIndex.byId[cs.id] = cs;
-      contentIndex.byName[cs.name] = cs;
-    }
-    for (var i = 0; i < contentVariants.length; ++i) {
-      var cv = contentVariants[i];
-      contentIndex.byId[cv.section].variants.push(cv)
-    }
-  }
-
-  loadSections().then(function() {
-    loadVariants().then(function() {
-      buildSectionSelect();
-      buildContentIndex();
-    })
-  });
 
   $("#add-section-button").on("click", function() {
     var sectionName =  $("#section-name-input").val();
@@ -307,4 +224,4 @@
     })
   })
 </script>
-</html>
+{% endblock load-last %}
