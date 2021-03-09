@@ -63,7 +63,9 @@
       <button id="add-section-button">Add section</button>
     </div>
     <div class="require-selection section centered">
-      <button id="generate-button">Generate</button>
+      <button id="randomize-button">Generate/regenerate</button>
+      <button id="generate-button">Preview</button>
+      <button id="raw-button">Show Text</button>
     </div>
   </div>
 {% endblock content %}
@@ -292,21 +294,39 @@
       })
     }
 
+    $("#randomize-button").on("click", function() {
+      bindAllSectionVariants(true);
+      saveContentConfiguration()
+    });
+
+    $("#raw-button").on("click", function() {
+      bindAllSectionVariants(false);
+      saveContentConfiguration().then(function() {
+        var url = "/content/raw?website=" + websiteValue() + "&slug=" + getSlug()
+        window.open(url, "_blank");
+      });
+    });
+
     $("#generate-button").on("click", function() {
-      bindAllSectionVariants();
+      bindAllSectionVariants(false);
       saveContentConfiguration().then(function() {
         var url = "/content/preview?website=" + websiteValue() + "&slug=" + getSlug()
         window.open(url, "_blank");
       });
     });
 
-    function bindAllSectionVariants() {
-      var sections = contentConfiguration.config.sections;
+    function bindAllSectionVariants(forceAll) {
+      var config = contentConfiguration.config;
+      var sections = config.sections;
       for (var i = 0; i < sections.length; ++i) {
         var section = sections[i];
-        section.vid = chooseVariant(section.sid);
+        if (forceAll || !section.vid) {
+          section.vid = chooseVariant(section.sid);
+        }
       }
-      contentConfiguration.config.image = chooseImage();
+      if (forceAll || !config.image) {
+        config.image = chooseImage();
+      }
     }
 
     function chooseVariant(sectionId) {
