@@ -60,22 +60,22 @@ class PageBuilder:
     self._preload_variants()
 
   def _preload_sections(self):
-    sids = (section["sid"] for section in self.ccfg.config["sections"])
+    sids = (int(section["sid"]) for section in self.ccfg.config["sections"])
     all_sections = models.ContentSection.objects.filter(id__in=sids)
-    self.sections = dict((s.id, s) for s in all_sections)
+    self.sections = dict((str(s.id), s) for s in all_sections)
 
   def _preload_variants(self):
-    vids = (section["vid"] for section in self.ccfg.config["sections"])
+    vids = (int(section["vid"]) for section in self.ccfg.config["sections"])
     all_variants = models.ContentVariant.objects.filter(id__in=vids)
-    self.variant_text = dict((v.id, v.text) for v in all_variants)
+    self.variant_text = dict((str(v.id), v.text) for v in all_variants)
 
   def build(self):
     slot_text = {}
     for slot_name in models.ContentSlot.NAMES:
       slot_text[slot_name] = ""
     for s in self.ccfg.config["sections"]:
-      slot_name = self.sections[s["sid"]].slot
-      section_text = self.expand_template(s["vid"])
+      slot_name = self.sections[str(s["sid"])].slot
+      section_text = self.expand_template(str(s["vid"]))
       slot_text[slot_name] += section_text
     return slot_text
 
@@ -121,15 +121,18 @@ class PreviewView(View):
     rep_page_text = get_url(rep_page_url)
     rep_page_soup = BeautifulSoup(rep_page_text, "html.parser")
     slot_containers = self.preprocess_page(rep_page_soup)
-    for slot_name in models.ContentSlot.NAMES:
-      slot_text = slot_texts[slot_name]
-      slot_soup = BeautifulSoup(slot_text, "html.parser")
-      slot_containers[slot_name].append(slot_soup)
+    if slot_containers:
+      for slot_name in models.ContentSlot.NAMES:
+        slot_text = slot_texts[slot_name]
+        slot_soup = BeautifulSoup(slot_text, "html.parser")
+        slot_containers[slot_name].append(slot_soup)
     return str(rep_page_soup)
 
   def preprocess_page(self, rep_page_soup):
     # Awareness of site's page layout.
     picker = rep_page_soup.find("div", class_="oem-vehicle-picker-module")
+    if not picker:
+      return None
     body = picker.parent.parent
     picker.extract()
     left_content = rep_page_soup.find("div", class_="left-content")
