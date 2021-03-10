@@ -1,5 +1,27 @@
 {% extends "base.html" %}
 
+{% block load-first %}
+  {{ block.super }}
+  <style>
+    #content-sections-list {
+      list-style-type: none;
+    }
+    #content-sections-list li {
+      padding: 7px;
+      border-radius: 7px;
+      border: solid 1px #888;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+    }
+    #content-sections-list li button {
+      padding: 0 4px;
+      font-size: 20px;
+    }
+  </style>
+{% endblock load-first %}
+
 {% block content %}
   <div class="main">
     <h2 class="centered">OEM Interactive: SEO Landing Page Content Admin</h2>
@@ -52,18 +74,20 @@
       <span>Images available for this year/make/model: <b id="nimages-span">---</b></span>
       <span><a href="test123">Add images</a></span>
     </div>
-    <div class="require-selection section row">
+    <div class="section row">
       <h3>Page Table of Contents:</h3>
       <span><a href="ccat123">See content catalog</a></span>
     </div>
     <div class="require-selection">
       <ul id="content-sections-list">
       </ul>
-      <div class="indented"><select id="section-select"></select>
+    </div>
+    <div class="require-selection centered">
+      <select id="section-select"></select>
       <button id="add-section-button">Add section</button>
     </div>
     <div class="require-selection section centered">
-      <button id="randomize-button">Generate/regenerate</button>
+      <button id="randomize-button">Generate</button>
       <button id="generate-button">Preview</button>
       <button id="raw-button">Show Text</button>
     </div>
@@ -81,6 +105,23 @@
     $("#make-select").on("change", checkComplete);
     $("#model-input").on("change", checkComplete);
 
+    $("#content-sections-list").sortable({
+      start: function(event, ui) {
+        var startingPos = ui.item.index();
+        ui.item.data("startingPos", startingPos);
+      },
+      update: function(event, ui) {
+        var startingPos = ui.item.data("startingPos")
+        var endingPos = ui.item.index();
+        var css = contentConfiguration.config.sections;
+        var mover = css[startingPos];
+        css.splice(startingPos, 1)
+        css.splice(endingPos, 0, mover)
+        console.log("after", contentConfiguration.config);
+      }
+    });
+    $("#content-sections-list").disableSelection();
+
     function checkComplete() {
       if (contentSections) {
         if (websiteValue() && yearValue() && makeValue() && modelValue()) {
@@ -90,7 +131,7 @@
           $(".require-selection button").attr("disabled", true);
           $(".require-selection input").attr("disabled", true);
           $(".require-selection").removeClass("selection");
-          $("#generate-button").text("Generate");
+          $("#generate-button").text("Preview");
           $("#generate-button").attr("disabled", true)
           $("#nimages-span").text("---")
         }
@@ -103,7 +144,7 @@
           $(".require-selection button").attr("disabled", false);
           $(".require-selection input").attr("disabled", false);
           $(".require-selection").addClass("selection");
-          $("#generate-button").text("Generate " + previewUrl());
+          $("#generate-button").text("Preview " + previewUrl());
           $("#generate-button").attr("disabled", false);
         })
       })
@@ -141,29 +182,31 @@
       if (contentConfiguration && contentConfiguration.config.sections) {
         var sections = contentConfiguration.config.sections;
         for (var i = 0; i < sections.length; ++i) {
-          var row = renderSection(sections[i]);
+          var row = renderSection(sections[i].sid);
           $("#content-sections-list").append(row);
         }
       }
       renderSectionSelect();
     }
 
-    function renderSection(section) {
-      var row = $("<li>").append($("<div>").text(section.name));
+    function renderSection(sid) {
+      var row = $("<li>");
+      row.append($('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>draggable</title><path d="M2 11h16v2H2zm0-4h16v2H2zm8 11l3-3H7l3 3zm0-16L7 5h6l-3-3z"/></svg>'))
+      row.append($("<div>").text(contentIndex.byId[sid].name));
       var deleteButton = $("<button>×</button>");
       row.append(deleteButton);
       deleteButton.on("click", function() {
-        removeSection(section);
+        removeSection(sid);
       })
       $("#content-sections-list").append(row);
       return row;
     }
 
-    function removeSection(section) {
+    function removeSection(sid) {
       if (contentConfiguration && contentConfiguration.config.sections) {
         var sections = contentConfiguration.config.sections;
         for (var i = 0; i < sections.length; ++i) {
-          if (sections[i] == section) {
+          if (sections[i].sid == sid) {
             sections.splice(i, 1);
             renderSections();
             break;
@@ -176,7 +219,7 @@
       var option = $("#section-select").find("option:selected");
       if (option.val()) {
         var sectionId = option.val();
-        addSectionToConfiguration(contentSections.byId[sectionId]);
+        addSectionToConfiguration(contentIndex.byId[sectionId]);
         renderSections();
       }
     })
