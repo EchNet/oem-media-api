@@ -31,5 +31,6 @@ python-decouple
 python-dotenv
 python-jose
 raven
+social-auth-app-django
 unicodecsv
 whitenoise

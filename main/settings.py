@@ -33,16 +33,17 @@ INSTALLED_APPS = (
 
     # 3rd party
     "admin_auto_filters",
+    "corsheaders",
     "django_extensions",
     "django_object_actions",
+    'import_export',
     "raven.contrib.django.raven_compat",
-    "storages",
-    "widget_tweaks",
-    "corsheaders",
     "rest_framework",
     "rest_framework_api_key",
     "rest_framework_swagger",
-    'import_export',
+    "social_django",
+    "storages",
+    "widget_tweaks",
 
     # custom apps
     "content",
@@ -94,6 +95,10 @@ AUTH_PASSWORD_VALIDATORS = [
                  ".NumericPasswordValidator")
     },
 ]
+AUTHENTICATION_BACKENDS = (
+    "social_core.backends.google.GoogleOAuth2",
+    "django.contrib.auth.backends.ModelBackend",
+)
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
@@ -208,3 +213,21 @@ JWT_AUTH = {
     "JWT_VERIFY": True,
     "JWT_VERIFY_EXPIRATION": True,
 }
+
+# Social Auth
+SOCIAL_AUTH_URL_NAMESPACE = "social"
+SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ["username", "first_name", "email"]
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", default="")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET", default="")
+SOCIAL_AUTH_PIPELINE = (
+    "social_core.pipeline.social_auth.social_details",
+    "social_core.pipeline.social_auth.social_uid",
+    "social_core.pipeline.social_auth.auth_allowed",
+    "social_core.pipeline.social_auth.social_user",
+    "social_core.pipeline.user.get_username",
+    "social_core.pipeline.user.create_user",
+    "main.social_auth.trace",
+    "social_core.pipeline.social_auth.associate_user",
+    "social_core.pipeline.social_auth.load_extra_data",
+    "social_core.pipeline.user.user_details",
+)

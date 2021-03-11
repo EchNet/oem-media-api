@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block load-first %}
+  {{ block.super }}
+  <style>
+    body {
+      background: #e8e8e8;
+    }
+    div.content {
+      text-align: center;
+      padding: 70px 50px;
+      margin: 60px auto;
+      max-width: 340px;
+      background: white;
+      border-radius: 30px;
+    }
+    a[href] {
+      color: #750;
+      text-decoration: none;
+    }
+    a[href]:hover {
+      color: #a87822;
+      text-decoration: underline;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="content"> 
+    <p><img width="240" src="{% static 'img/logo-black.png' %}"></p>
+    <p><a href="{% url "social:begin" "google-oauth2" %}">Login with Google</a></p>
+  </div>
+{% endblock content %}
