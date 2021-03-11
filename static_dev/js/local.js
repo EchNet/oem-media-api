@@ -1,3 +1,10 @@
+/* Hamburger menu */
+$(".hamburger").click(function() {
+  var burger = $(this);
+  (burger[burger.hasClass("rotated") ? "removeClass" : "addClass"])("rotated");
+  $(".hamburger-menu").slideToggle("slow");
+})
+
 var contentSections;
 var contentVariants;
 var contentIndex;

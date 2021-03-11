@@ -7,13 +7,12 @@
     body {
       background: #e8e8e8;
     }
-    div.content {
+    section.card.content {
       text-align: center;
       padding: 70px 50px;
       margin: 60px auto;
       max-width: 340px;
-      background: white;
-      border-radius: 30px;
+      min-height: 0;
     }
     a[href] {
       color: #750;
@@ -26,9 +25,9 @@
   </style>
 {% endblock %}
 
-{% block content %}
-  <div class="content"> 
+{% block body-content %}
+  <section class="card content"> 
     <p><img width="240" src="{% static 'img/logo-black.png' %}"></p>
     <p><a href="{% url "social:begin" "google-oauth2" %}">Login with Google</a></p>
-  </div>
-{% endblock content %}
+  </section>
+{% endblock body-content %}

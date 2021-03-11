@@ -1,8 +1,19 @@
-{% extends "base.html" %}
+{% extends "loggedin.html" %}
+
+{% block header %}{% include "header.html" with title="SEO Landing Page Builder" %}{% endblock header %}
 
 {% block load-first %}
   {{ block.super }}
   <style>
+    .require-selection:not(.selection) {
+      display: none;
+    }
+    .require-selection:not(.selection) td {
+      display: none;
+    }
+    .require-selection:not(.selection) th {
+      display: none;
+    }
     #content-sections-list {
       list-style-type: none;
     }
@@ -23,75 +34,74 @@
 {% endblock load-first %}
 
 {% block content %}
-  <div class="main">
-    <h2 class="centered">OEM Interactive: SEO Landing Page Content Admin</h2>
-    <div class="section">
-      Assemble content for SEO landing pages here.
-    </div>
-    <div class="section centered">
-      <select id="website-select">
-        <option value="">Select a website...</option>
-        <option>sparksparts.com</option>
-        <option>sneedparts.com</option>
-        <option value="">More to be added...</option>
-      </select>
-    </div>
-    <div class="section centered">
-      <select id="year-select">
-        <option value="">Select a year...</option>
-        <option>2021</option>
-        <option>2020</option>
-        <option>2019</option>
-        <option>2018</option>
-        <option>2017</option>
-        <option>2016</option>
-        <option>2015</option>
-        <option>2014</option>
-        <option>2013</option>
-        <option>2012</option>
-        <option>2011</option>
-        <option>2010</option>
-      </select>
-      <select id="make-select">
-        <option value="">Select a make...</option>
-        <option value="audi">Audi</option>
-        <option value="fiat">Fiat</option>
-        <option value="ford">Ford</option>
-        <option value="gm">GM</option>
-        <option value="hyundai">Hyundai</option>
-        <option value="kia">Kia</option>
-        <option value="nissan">Nissan</option>
-        <option value="saab">Saab</option>
-        <option value="subaru">Subaru</option>
-        <option value="toyota">Toyota</option>
-        <option value="volkswagen">Volkswagen</option>
-        <option value="volvo">Volvo</option>
-        <option value="">More to be added...</option>
-      </select>
-      <input id="model-input" type="text" placeholder="Enter a model"/>
-    </div>
-    <div class="require-selection section row">
-      <span>Images available for this year/make/model: <b id="nimages-span">---</b></span>
-      <span><a href="test123">Add images</a></span>
-    </div>
-    <div class="section row">
-      <h3>Page Table of Contents:</h3>
-      <span><a href="ccat123">See content catalog</a></span>
-    </div>
-    <div class="require-selection">
-      <ul id="content-sections-list">
-      </ul>
-    </div>
-    <div class="require-selection centered">
-      <select id="section-select"></select>
-      <button id="add-section-button">Add section</button>
-    </div>
-    <div class="require-selection section centered">
-      <button id="randomize-button">Generate</button>
-      <button id="generate-button">Preview</button>
-      <button id="raw-button">Show Text</button>
-    </div>
+<section class="full">
+  <div class="section">
+    Assemble content for SEO landing pages here.
   </div>
+  <div class="section centered">
+    <select id="website-select">
+      <option value="">Select a website...</option>
+      <option>sparksparts.com</option>
+      <option>sneedparts.com</option>
+      <option value="">More to be added...</option>
+    </select>
+  </div>
+  <div class="section centered">
+    <select id="year-select">
+      <option value="">Select a year...</option>
+      <option>2021</option>
+      <option>2020</option>
+      <option>2019</option>
+      <option>2018</option>
+      <option>2017</option>
+      <option>2016</option>
+      <option>2015</option>
+      <option>2014</option>
+      <option>2013</option>
+      <option>2012</option>
+      <option>2011</option>
+      <option>2010</option>
+    </select>
+    <select id="make-select">
+      <option value="">Select a make...</option>
+      <option value="audi">Audi</option>
+      <option value="fiat">Fiat</option>
+      <option value="ford">Ford</option>
+      <option value="gm">GM</option>
+      <option value="hyundai">Hyundai</option>
+      <option value="kia">Kia</option>
+      <option value="nissan">Nissan</option>
+      <option value="saab">Saab</option>
+      <option value="subaru">Subaru</option>
+      <option value="toyota">Toyota</option>
+      <option value="volkswagen">Volkswagen</option>
+      <option value="volvo">Volvo</option>
+      <option value="">More to be added...</option>
+    </select>
+    <input id="model-input" type="text" placeholder="Enter a model"/>
+  </div>
+  <div class="require-selection section row">
+    <span>Images available for this year/make/model: <b id="nimages-span">---</b></span>
+    <span><a href="seolp-media">Add images</a></span>
+  </div>
+  <div class="section row">
+    <h3>Page Table of Contents:</h3>
+    <span><a href="seolp-catalog">See content catalog</a></span>
+  </div>
+  <div class="require-selection">
+    <ul id="content-sections-list">
+    </ul>
+  </div>
+  <div class="require-selection centered">
+    <select id="section-select"></select>
+    <button id="add-section-button">Add section</button>
+  </div>
+  <div class="require-selection section centered">
+    <button id="randomize-button">Generate</button>
+    <button id="generate-button">Preview</button>
+    <button id="raw-button">Show Text</button>
+  </div>
+</section>
 {% endblock content %}
 
 {% block load-last %}

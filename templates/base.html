@@ -2,7 +2,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>OEM INTERACTIVE Internal</title>
+    <title>OEM INTERACTIVE {% block title %}Internal{% endblock title %} </title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
@@ -11,15 +11,17 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" href="{% static 'img/fav.jpg' %}">
-    {% block load-first %}
-      {% include "static_styles.html" %}
-      {% include "static_javascripts.html" %}
-    {% endblock load-first %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,400,700" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="{% static 'css/local.css' %}" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+    {% block load-first %}{% endblock load-first %}
   </head>
   <body>
-    {% block content %}{% endblock content %}
+    {% block body-content %}{% endblock body-content %}
   </body>
-  {% block load-last %}
-    <script type="text/javascript" src="{% static 'js/local.js' %}"></script>
-  {% endblock load-last %}
+  <script type="text/javascript" src="{% static 'js/local.js' %}"></script>
+  {% block load-last %}{% endblock load-last %}
 </html>

@@ -1,3 +1,4 @@
+/* Common page layout. */
 html, body, header, footer, section, nav, div {
   margin: 0px;
   padding: 0px;
@@ -7,36 +8,96 @@ html, body {
   height: 100%;
 }
 body {
+  background-color: #e8e8e8;
   font-family: 'Lato', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-.main {
-  max-width: 550px;
-  margin: auto;
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #666;
+  color: white;
+  border-bottom: solid 1px #555;
+  font-size: 18px;
+}
+header a {
+  color: white;
+  text-decoration: none;
+}
+header a:hover {
+  color: #bbb;
+  text-decoration: underline;
+}
+header .welcome {
+  color: #dd6;
+}
+section.card {
+  max-width: 640px;
+  margin: 30px auto;
+  background-color: white;
+  border-radius: 30px;
+  min-height: 200px;
+  padding: 30px;
+  box-shadow: 0 0 5px 2px #ddd;
+}
+section.full {
+  padding: 30px;
+  background-color: white;
+}
+/* Hamburger menu */
+.hamburger {
+  background: none;
+  line-height: 18px;
+  color: #bb9;
+  border: 0;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+  font-size: 1.4em;
+  transition: all 0.3s;
+}
+.hamburger.rotated {
+  transform: rotate(90deg);
+}
+.hamburger-menu{
+  display: none;
+  z-index:1000000;
+  font-weight:bold;
+  font-size:0.8em; width:100%; background:#f1f1f1;  position:absolute; text-align:center; font-size:12px;
+}
+.hamburger-menu ul {margin: 0; padding: 0; list-style-type: none; list-style-image: none;}
+.hamburger-menu li {display: block;   padding:15px 0 15px 0; border-bottom:#dddddd 1px solid;}
+.hamburger-menu li:hover{display: block;    background:#ffffff; padding:15px 0 15px 0; border-bottom:#dddddd 1px solid;}
+.hamburger-menu ul li a { text-decoration:none;  margin: 0px; color:#666;}
+.hamburger-menu ul li a:hover {  color: #666; text-decoration:none;}
+.hamburger-menu a{text-decoration:none; color:#666;}
+.hamburger-menu a:hover{text-decoration:none; color:#666;}
+/* Decorator classes. */
+.centered {
+  text-align: center;
+}
+.indented {
+  padding-left: 30px;
 }
 .error {
-  color: red;
+  color: #c00;
 }
-.require-selection:not(.selection) {
-  display: none;
+.upper {
+  text-transform: uppercase;
 }
-.require-selection:not(.selection) td {
-  display: none;
+.title {
+  text-transform: capitalize;
 }
-.require-selection:not(.selection) th {
-  display: none;
-}
+/* Questionable (component-specific) stuff follows. */
 table {
   margin-left: 50px;
 }
 .section {
   margin: 20px 30px;
   line-height: 1.45;
-}
-.centered {
-  text-align: center;
-}
-.indented {
-  padding-left: 30px;
 }
 li {
   font-size: 15px;

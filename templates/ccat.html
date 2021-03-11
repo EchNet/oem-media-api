@@ -1,8 +1,9 @@
-{% extends "base.html" %}
+{% extends "loggedin.html" %}
+
+{% block header %}{% include "header.html" with title="SEO Landing Page Content Catalog" %}{% endblock header %}
 
 {% block content %}
-  <div class="main">
-    <h2 class="centered">OEM Interactive: SEO Landing Page Content Catalog</h2>
+  <section class="full">
     <p>Define the content sections that make up SEO landing pages here.</p>
     <div class="section row">
       <select id="section-select"><option value="">-- No sections --</option></select>
@@ -33,7 +34,7 @@
     <div class="section centered">
       <button id="save-button" style="display:none">Save</button>
     </div>
-  </div>
+  </section>
 {% endblock content %}
 
 {% block load-last %}
